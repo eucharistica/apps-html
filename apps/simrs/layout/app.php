@@ -7,6 +7,7 @@
 
 ?><!DOCTYPE html>
 <html lang="en">
+
 <head>
     <base href="" />
     <title><?= htmlspecialchars($emr_title ?? 'EMR SIMRS') ?></title>
@@ -23,15 +24,19 @@
     <?php include $root . '/partials/trackers/_ga-tag-manager-for-head.php'; ?>
 
     <script>
-        if (window.top != window.self) {
-            window.top.location.replace(window.self.location.href);
-        }
+        (function () {
+            // allow running inside iframe for SIMRS tab system
+            const allowIframe = new URLSearchParams(window.location.search).get('iframe') === '1';
+            if (!allowIframe && window.top !== window.self) {
+                window.top.location.replace(window.self.location.href);
+            }
+        })();
     </script>
 </head>
 
 <body id="kt_app_body" data-kt-app-page-loading-enabled="true" data-kt-app-page-loading="on"
-      data-kt-app-header-fixed="true" data-kt-app-header-fixed-mobile="true" data-kt-app-toolbar-enabled="true"
-      class="app-default">
+    data-kt-app-header-fixed="true" data-kt-app-header-fixed-mobile="true" data-kt-app-toolbar-enabled="true"
+    class="app-default">
 
     <?php include $root . '/partials/theme-mode/_init.php'; ?>
     <?php include $root . '/partials/trackers/_ga-tag-manager-for-body.php'; ?>
@@ -71,4 +76,5 @@
     <script src="<?= $asset ?>js/custom/utilities/modals/upgrade-plan.js"></script>
 
 </body>
+
 </html>

@@ -38,7 +38,7 @@ try {
         )
         ON DUPLICATE KEY UPDATE title=VALUES(title), url=VALUES(url), is_active=1");
 
-    $url = EMR_BASE_URL . 'apps/simrs/index.php?page=' . urlencode($page);
+    $url = EMR_BASE_URL . 'apps/simrs/index.php?page=' . urlencode($page) . '&iframe=1';
     $stmt->execute([$userId, $page, $route['title'], $url, $userId]);
 
 } catch (Throwable $e) {
@@ -62,4 +62,14 @@ $emr_page = $page;
 $emr_title = $route['title'];
 $emr_content = $route['file'];
 
+if (($_GET['iframe'] ?? '') === '1') {
+    // hanya render konten, tanpa layout metronic
+    if (is_string($emr_content) && file_exists($emr_content)) {
+        include $emr_content;
+    } else {
+        echo '<div class="alert alert-info">placeholder content</div>';
+    }
+    exit;
+}
+// render full layout dengan toolbar, tabs, dll
 include $root . '/apps/simrs/layout/app.php';
