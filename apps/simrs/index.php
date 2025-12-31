@@ -1,0 +1,65 @@
+<?php
+// apps/simrs/index.php
+
+require_once __DIR__ . '/../auth/guard.php';
+require_once __DIR__ . '/../auth/rbac.php';
+require_once __DIR__ . '/../config/database.php';
+
+emr_require_login();
+
+$pdo = emr_pdo();
+$userId = (int)($_SESSION['emr_user']['id'] ?? 0);
+
+// Registry: page => [title, file, permission]
+$registry = require __DIR__ . '/registry.php';
+
+$page = (string)($_GET['page'] ?? 'dashboard');
+if (!isset($registry[$page])) {
+    header('Location: ' . EMR_ERROR_404);
+    exit;
+}
+
+$route = $registry[$page];
+$permission = $route['permission'] ?? null;
+if ($permission) {
+    emr_require_permission($permission);
+}
+
+// Save tab state (upsert + set active)
+try {
+    // deactivate others
+    $stmt = $pdo->prepare("UPDATE emr_user_tabs SET is_active = 0 WHERE user_id = ?");
+    $stmt->execute([$userId]);
+
+    // upsert current
+    $stmt = $pdo->prepare("INSERT INTO emr_user_tabs (user_id, tab_key, title, url, is_active, sort_order)
+        VALUES (?, ?, ?, ?, 1,
+            COALESCE((SELECT MAX(t.sort_order) + 1 FROM emr_user_tabs t WHERE t.user_id = ?), 1)
+        )
+        ON DUPLICATE KEY UPDATE title=VALUES(title), url=VALUES(url), is_active=1");
+
+    $url = EMR_BASE_URL . 'apps/simrs/index.php?page=' . urlencode($page);
+    $stmt->execute([$userId, $page, $route['title'], $url, $userId]);
+
+} catch (Throwable $e) {
+    // ignore tab persistence errors to not block app
+}
+
+// Load tabs for toolbar
+$tabs = [];
+try {
+    $stmt = $pdo->prepare("SELECT tab_key, title, url, is_active FROM emr_user_tabs WHERE user_id = ? ORDER BY sort_order ASC");
+    $stmt->execute([$userId]);
+    $tabs = $stmt->fetchAll();
+} catch (Throwable $e) {
+}
+
+// Expose variables for layout partials
+$root = EMR_ROOT;
+$asset = EMR_BASE_URL . 'assets/';
+$emr_tabs = $tabs;
+$emr_page = $page;
+$emr_title = $route['title'];
+$emr_content = $route['file'];
+
+include $root . '/apps/simrs/layout/app.php';
