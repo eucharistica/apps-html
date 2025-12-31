@@ -40,7 +40,6 @@ foreach ($tabs as $t) {
         </button>
         <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="#" data-emr-close-action="close_all">Close All</a></li>
-            <li><a class="dropdown-item" href="#" data-emr-close-action="close_other">Close All Other</a></li>
         </ul>
     </div>
 
@@ -50,10 +49,13 @@ foreach ($tabs as $t) {
             $url = $t['url'] ?? '#';
             $title = $t['title'] ?? ($t['tab_key'] ?? 'Tab');
             $key = $t['tab_key'] ?? '';
+            $isDashboard = ($key === 'dashboard');
         ?>
             <a href="<?= htmlspecialchars($url) ?>" class="emr-tablink <?= $isActive ? 'is-active' : '' ?>" data-emr-tab="1" data-emr-tab-key="<?= htmlspecialchars($key) ?>" data-emr-tab-url="<?= htmlspecialchars($url) ?>" id="emr-tab-<?= htmlspecialchars($key) ?>">
                 <span><?= htmlspecialchars($title) ?></span>
+                <?php if (!$isDashboard): ?>
                 <button type="button" class="emr-tab-close" aria-label="Close" data-emr-tab-close="1" data-emr-tab-key="<?= htmlspecialchars($key) ?>">&times;</button>
+                <?php endif; ?>
             </a>
         <?php endforeach; ?>
     </div>
@@ -158,14 +160,6 @@ foreach ($tabs as $t) {
 
         var active = document.querySelector('.emr-tablink.is-active');
         var activeKey = active ? active.getAttribute('data-emr-tab-key') : '';
-
-        if (action === 'close_other') {
-            if (!activeKey) return;
-            emrTabsPost('close_other', activeKey)
-                .then(function(){ window.location.reload(); })
-                .catch(function(){ window.location.reload(); });
-            return;
-        }
 
         if (action === 'close_all') {
             emrTabsPost('close_all', '')
