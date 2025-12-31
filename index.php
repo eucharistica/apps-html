@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/apps/auth/guest.php';
+require_once __DIR__ . '/apps/config/security.php';
 
 emr_redirect_if_logged_in();
+$csrf = emr_csrf_token();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -38,6 +40,7 @@ emr_redirect_if_logged_in();
 
 						<div class="py-20">
 							<form class="form w-100" method="post" action="apps/auth/sign-in.php">
+								<input type="hidden" name="_token" value="<?= htmlspecialchars($csrf) ?>" />
 								<div class="card-body">
 									<div class="text-start mb-10">
 										<h1 class="text-gray-900 mb-3 fs-3x">Sign In</h1>
@@ -85,6 +88,9 @@ emr_redirect_if_logged_in();
 				if (err === 'empty') text = 'Username dan password wajib diisi.';
 				if (err === 'invalid') text = 'Username atau password salah.';
 				if (err === 'inactive') text = 'Akun tidak aktif.';
+				if (err === 'csrf') text = 'Sesi tidak valid. Silakan refresh halaman dan coba lagi.';
+				if (err === 'hubungi_it') text = 'Terlalu banyak percobaan. Hubungi Admin/IT.';
+				if (err === 'locked') text = 'Akun/percobaan login sedang dikunci sementara. Coba lagi nanti.';
 				if (err === 'server') text = 'Terjadi kesalahan server. Hubungi admin.';
 
 				Swal.fire({ icon: 'error', title: title, text: text, confirmButtonText: 'OK' });

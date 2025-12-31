@@ -2,24 +2,52 @@
 // apps/auth/sign-in.php
 
 require_once __DIR__ . '/../config/bootstrap.php';
+require_once __DIR__ . '/../config/security.php';
 require_once __DIR__ . '/../config/database.php';
 
 $username = trim($_POST['username'] ?? '');
 $password = (string)($_POST['password'] ?? '');
+$token = (string)($_POST['_token'] ?? '');
 
 if ($username === '' || $password === '') {
     header('Location: /?error=empty');
     exit;
 }
 
+if (!emr_csrf_validate($token)) {
+    header('Location: /?error=csrf');
+    exit;
+}
+
 try {
     $pdo = emr_pdo();
+
+    // Basic in-session throttling state (no DB yet)
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $keyUnknown = 'login_unknown_' . sha1($ip);
+    $keyKnown = 'login_known_' . sha1($ip . '|' . strtolower($username));
+
+    $unknown = $_SESSION[$keyUnknown] ?? ['count' => 0, 'lock_until' => 0];
+    $known = $_SESSION[$keyKnown] ?? ['count' => 0];
+
+    if (($unknown['lock_until'] ?? 0) > time()) {
+        header('Location: /?error=locked');
+        exit;
+    }
 
     $stmt = $pdo->prepare("SELECT id, username, name, email, profile_photo_path, password, status FROM emr_users WHERE username = ? LIMIT 1");
     $stmt->execute([$username]);
     $user = $stmt->fetch();
 
     if (!$user) {
+        // Lockout only for unknown/random usernames: 5 tries => lock 10 minutes
+        $unknown['count'] = (int)($unknown['count'] ?? 0) + 1;
+        if ($unknown['count'] >= 5) {
+            $unknown['lock_until'] = time() + (10 * 60);
+            $unknown['count'] = 0;
+        }
+        $_SESSION[$keyUnknown] = $unknown;
+
         header('Location: /?error=invalid');
         exit;
     }
@@ -30,12 +58,26 @@ try {
     }
 
     if (!password_verify($password, $user['password'])) {
+        // Known username wrong password: after 10 show "hubungi IT" message
+        $known['count'] = (int)($known['count'] ?? 0) + 1;
+        $_SESSION[$keyKnown] = $known;
+
+        if ($known['count'] >= 10) {
+            header('Location: /?error=hubungi_it');
+            exit;
+        }
+
         header('Location: /?error=invalid');
         exit;
     }
 
+    // Success: reset throttles
+    unset($_SESSION[$keyUnknown], $_SESSION[$keyKnown]);
+
+    // Prevent session fixation
+    session_regenerate_id(true);
+
     // Update last login
-    $ip = $_SERVER['REMOTE_ADDR'] ?? null;
     $stmt = $pdo->prepare("UPDATE emr_users SET last_login_at = NOW(), last_login_ip = ? WHERE id = ?");
     $stmt->execute([$ip, $user['id']]);
 
