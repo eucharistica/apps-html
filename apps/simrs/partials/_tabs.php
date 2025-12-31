@@ -28,9 +28,29 @@ foreach ($tabs as $t) {
 
     .emr-tab-actions { flex:0 0 auto; }
 
-    #emr-tab-content { background:#fff; }
-    #emr-tab-content iframe { position:absolute; inset:0; width:100%; height:100%; border:0; display:none; }
-    #emr-tab-content iframe.is-active { display:block; }
+    /* IMPORTANT:
+       Jangan pakai display:none untuk iframe karena di sebagian browser bisa memicu reload.
+       Kita keep iframe tetap "hidup" dan hanya dipindah offscreen + disable pointer-events. */
+    #emr-tab-content { background:#fff; position:relative; }
+
+    #emr-tab-content iframe {
+        position:absolute;
+        top:0;
+        left:-100000px;          /* offscreen */
+        width:100%;
+        height:100%;
+        border:0;
+        visibility:hidden;
+        opacity:0;
+        pointer-events:none;
+    }
+
+    #emr-tab-content iframe.is-active {
+        left:0;
+        visibility:visible;
+        opacity:1;
+        pointer-events:auto;
+    }
 </style>
 
 <div class="emr-tabbar">
@@ -67,7 +87,6 @@ foreach ($tabs as $t) {
     </div>
 </div>
 
-<!-- <script src="<?= EMR_BASE_URL ?>assets/plugins/custom/sortablejs/sortable.min.js"></script> -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
     function emrTabsPost(action, tabKey, extra) {
@@ -102,6 +121,7 @@ foreach ($tabs as $t) {
             iframe.setAttribute('data-emr-tab-key', key);
             content.appendChild(iframe);
         }
+
         return iframe;
     }
 
