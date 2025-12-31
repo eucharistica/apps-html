@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../apps/config/bootstrap.php';
 // Basic session user info
 $user = $_SESSION['emr_user'] ?? [];
 
-$username = $user['username'] ?? 'User';
+$name = $user['name'] ?? 'Name';
 $email = $user['email'] ?? null;
 
 // Photo
@@ -33,7 +33,7 @@ $signOutUrl = EMR_BASE_URL . 'apps/auth/sign-out.php';
             <!--begin::Username-->
             <div class="d-flex flex-column">
                 <div class="fw-bold d-flex align-items-center fs-5">
-                    <?= htmlspecialchars($username) ?>
+                    <?= htmlspecialchars($name) ?>
                 </div>
                 <?php if ($email): ?>
                     <span class="fw-semibold text-muted fs-7"><?= htmlspecialchars($email) ?></span>

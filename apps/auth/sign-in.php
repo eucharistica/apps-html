@@ -15,7 +15,7 @@ if ($username === '' || $password === '') {
 try {
     $pdo = emr_pdo();
 
-    $stmt = $pdo->prepare("SELECT id, username, email, profile_photo_path, password, status FROM emr_users WHERE username = ? LIMIT 1");
+    $stmt = $pdo->prepare("SELECT id, username, name, email, profile_photo_path, password, status FROM emr_users WHERE username = ? LIMIT 1");
     $stmt->execute([$username]);
     $user = $stmt->fetch();
 
@@ -57,6 +57,7 @@ try {
     $_SESSION['emr_user'] = [
         'id' => (int)$user['id'],
         'username' => $user['username'],
+        'name' => $user['name'],
         'email' => $user['email'],
         'profile_photo_path' => $user['profile_photo_path'],
         'roles' => $roles,
