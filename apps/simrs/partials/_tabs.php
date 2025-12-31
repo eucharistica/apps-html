@@ -1,8 +1,9 @@
 <?php
-// apps/simrs/partials/_tabs.php (updated for iframe + sortable)
+// apps/simrs/partials/_tabs.php
 
 $tabs = $GLOBALS['EMR_TABS'] ?? [];
 $activeKey = null;
+
 foreach ($tabs as $t) {
     if (!empty($t['is_active'])) {
         $activeKey = $t['tab_key'] ?? null;
@@ -51,7 +52,12 @@ foreach ($tabs as $t) {
             $key = $t['tab_key'] ?? '';
             $isDashboard = ($key === 'dashboard');
         ?>
-            <a href="<?= htmlspecialchars($url) ?>" class="emr-tablink <?= $isActive ? 'is-active' : '' ?>" data-emr-tab="1" data-emr-tab-key="<?= htmlspecialchars($key) ?>" data-emr-tab-url="<?= htmlspecialchars($url) ?>" id="emr-tab-<?= htmlspecialchars($key) ?>">
+            <a href="<?= htmlspecialchars($url) ?>"
+               class="emr-tablink <?= $isActive ? 'is-active' : '' ?> <?= $isDashboard ? 'is-pinned' : '' ?>"
+               data-emr-tab="1"
+               data-emr-tab-key="<?= htmlspecialchars($key) ?>"
+               data-emr-tab-url="<?= htmlspecialchars($url) ?>"
+               id="emr-tab-<?= htmlspecialchars($key) ?>">
                 <span><?= htmlspecialchars($title) ?></span>
                 <?php if (!$isDashboard): ?>
                 <button type="button" class="emr-tab-close" aria-label="Close" data-emr-tab-close="1" data-emr-tab-key="<?= htmlspecialchars($key) ?>">&times;</button>
@@ -67,6 +73,7 @@ foreach ($tabs as $t) {
     function emrTabsPost(action, tabKey, extra) {
         var body = 'action=' + encodeURIComponent(action) + '&return=1';
         if (tabKey) body += '&tab_key=' + encodeURIComponent(tabKey);
+
         if (extra) {
             for (var k in extra) {
                 body += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(extra[k]);
@@ -80,17 +87,11 @@ foreach ($tabs as $t) {
         }).then(function (r) { return r.json(); });
     }
 
-    function emrActivateTab(key, url) {
-        if (!key) return;
+    function emrEnsureIframe(key, url) {
+        if (!key) return null;
         var content = document.getElementById('emr-tab-content');
-        if (!content) return;
+        if (!content) return null;
 
-        // toggle active class on tab header
-        document.querySelectorAll('.emr-tablink').forEach(function (el) {
-            el.classList.toggle('is-active', el.getAttribute('data-emr-tab-key') === key);
-        });
-
-        // find or create iframe
         var iframeId = 'emr-iframe-' + key;
         var iframe = document.getElementById(iframeId);
 
@@ -101,11 +102,56 @@ foreach ($tabs as $t) {
             iframe.setAttribute('data-emr-tab-key', key);
             content.appendChild(iframe);
         }
+        return iframe;
+    }
 
-        // show active iframe, hide others
+    function emrGetTabsInOrder() {
+        return Array.prototype.slice.call(document.querySelectorAll('#emr-tabbar-menu .emr-tablink'));
+    }
+
+    function emrPreloadNeighbors(activeKey) {
+        var tabs = emrGetTabsInOrder();
+        if (!tabs.length) return;
+
+        var idx = -1;
+        for (var i = 0; i < tabs.length; i++) {
+            if (tabs[i].getAttribute('data-emr-tab-key') === activeKey) {
+                idx = i;
+                break;
+            }
+        }
+        if (idx === -1) return;
+
+        var positions = [idx, idx - 1, idx + 1];
+        positions.forEach(function (pos) {
+            if (pos < 0 || pos >= tabs.length) return;
+
+            var el = tabs[pos];
+            var key = el.getAttribute('data-emr-tab-key');
+            var url = el.getAttribute('data-emr-tab-url');
+            emrEnsureIframe(key, url);
+        });
+    }
+
+    function emrActivateTab(key, url) {
+        if (!key) return;
+
+        var content = document.getElementById('emr-tab-content');
+        if (!content) return;
+
+        document.querySelectorAll('.emr-tablink').forEach(function (el) {
+            el.classList.toggle('is-active', el.getAttribute('data-emr-tab-key') === key);
+        });
+
+        var iframe = emrEnsureIframe(key, url);
+
         content.querySelectorAll('iframe').forEach(function (f) {
             f.classList.toggle('is-active', f === iframe);
         });
+
+        try { sessionStorage.setItem('emr_active_tab_key', key); } catch (e) {}
+
+        emrPreloadNeighbors(key);
     }
 
     document.addEventListener('click', function (e) {
@@ -126,7 +172,6 @@ foreach ($tabs as $t) {
                     if (iframe) iframe.remove();
 
                     if (data && data.redirect) {
-                        // when redirect is provided, navigate whole page (easier sync)
                         window.location.href = data.redirect;
                         return;
                     }
@@ -148,18 +193,16 @@ foreach ($tabs as $t) {
         }
     }, true);
 
-    // Dropdown Close All / Other
+    // Dropdown Close All
     document.addEventListener('click', function (e) {
         var el = e.target;
         if (!el || !el.getAttribute) return;
+
         var action = el.getAttribute('data-emr-close-action');
         if (!action) return;
 
         e.preventDefault();
         e.stopPropagation();
-
-        var active = document.querySelector('.emr-tablink.is-active');
-        var activeKey = active ? active.getAttribute('data-emr-tab-key') : '';
 
         if (action === 'close_all') {
             emrTabsPost('close_all', '')
@@ -178,24 +221,44 @@ foreach ($tabs as $t) {
     // Init active iframe on first load (server-side active flag)
     document.addEventListener('DOMContentLoaded', function () {
         var active = document.querySelector('.emr-tablink.is-active');
+
+        // fallback (runtime only)
+        if (!active) {
+            try {
+                var key = sessionStorage.getItem('emr_active_tab_key') || '';
+                if (key) active = document.querySelector('.emr-tablink[data-emr-tab-key="' + key.replace(/"/g,'') + '"]');
+            } catch (e) {}
+        }
+
         if (!active) return;
+
         emrActivateTab(
             active.getAttribute('data-emr-tab-key'),
             active.getAttribute('data-emr-tab-url')
         );
     });
 
-    // SortableJS – drag to reorder tabs (UI only for now)
+    // SortableJS – drag to reorder tabs (persist to DB). Dashboard pinned.
     document.addEventListener('DOMContentLoaded', function () {
         var tabbar = document.getElementById('emr-tabbar-menu');
         if (!tabbar || typeof Sortable === 'undefined') return;
 
-        Sortable.create(document.getElementById('emr-tabbar-menu'), {
+        Sortable.create(tabbar, {
             animation: 150,
             direction: 'horizontal',
-            draggable: '.emr-tablink',
-            filter: '.emr-tab-close',
-            preventOnFilter: false
+            draggable: '.emr-tablink:not(.is-pinned)',
+            filter: '.emr-tab-close, .is-pinned',
+            preventOnFilter: false,
+            onEnd: function () {
+                var keys = [];
+                document.querySelectorAll('#emr-tabbar-menu .emr-tablink').forEach(function (el) {
+                    var k = el.getAttribute('data-emr-tab-key');
+                    if (k) keys.push(k);
+                });
+
+                emrTabsPost('reorder', '', { tab_keys: keys.join(',') })
+                    .catch(function(){ /* ignore */ });
+            }
         });
     });
 </script>

@@ -94,10 +94,70 @@ try {
         exit;
     }
 
+    if ($action === 'reorder') {
+        $csv = (string)($_POST['tab_keys'] ?? '');
+        $keys = array_values(array_filter(array_map('trim', explode(',', $csv))));
+
+        if (!$keys) {
+            http_response_code(400);
+            exit;
+        }
+
+        // Unique, preserve order
+        $seen = [];
+        $ordered = [];
+        foreach ($keys as $k) {
+            if ($k === '' || isset($seen[$k])) continue;
+            $seen[$k] = true;
+            $ordered[] = $k;
+        }
+
+        // Validate ownership
+        $placeholders = implode(',', array_fill(0, count($ordered), '?'));
+        $stmt = $pdo->prepare("SELECT tab_key FROM emr_user_tabs WHERE user_id = ? AND tab_key IN ($placeholders)");
+        $stmt->execute(array_merge([$userId], $ordered));
+        $valid = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $validSet = [];
+        foreach ($valid as $vk) $validSet[$vk] = true;
+
+        $pdo->beginTransaction();
+
+        // Pin dashboard to left
+        if (isset($validSet['dashboard'])) {
+            $pdo->prepare("UPDATE emr_user_tabs SET sort_order = 0 WHERE user_id = ? AND tab_key = 'dashboard'")
+                ->execute([$userId]);
+        }
+
+        $order = 1;
+        foreach ($ordered as $k) {
+            if ($k === 'dashboard') continue;
+            if (!isset($validSet[$k])) continue;
+
+            $pdo->prepare("UPDATE emr_user_tabs SET sort_order = ? WHERE user_id = ? AND tab_key = ?")
+                ->execute([$order, $userId, $k]);
+            $order++;
+        }
+
+        $pdo->commit();
+
+        if ($returnJson) {
+            header('Content-Type: application/json');
+            echo json_encode(['ok' => true]);
+            exit;
+        }
+
+        echo 'OK';
+        exit;
+    }
+
     http_response_code(400);
     exit;
 
 } catch (Throwable $e) {
+    if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     http_response_code(500);
     exit;
 }
