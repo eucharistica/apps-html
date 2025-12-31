@@ -1,0 +1,20 @@
+# Apache security hardening (basic)
+
+# Block direct access to env/config/seeder folders
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# deny direct access to env/config/db scripts
+RewriteRule ^apps/config/ - [F,L]
+RewriteRule ^apps/db/ - [F,L]
+</IfModule>
+
+# Disable directory listing
+Options -Indexes
+
+# Basic security headers
+<IfModule mod_headers.c>
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "SAMEORIGIN"
+Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

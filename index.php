@@ -1,7 +1,6 @@
 <?php
-require_once __DIR__ . '/apps/config/bootstrap.php';
+require_once __DIR__ . '/apps/auth/guest.php';
 
-// If already logged in, skip login form
 emr_redirect_if_logged_in();
 ?>
 <!DOCTYPE html>
@@ -88,12 +87,7 @@ emr_redirect_if_logged_in();
 				if (err === 'inactive') text = 'Akun tidak aktif.';
 				if (err === 'server') text = 'Terjadi kesalahan server. Hubungi admin.';
 
-				Swal.fire({
-					icon: 'error',
-					title: title,
-					text: text,
-					confirmButtonText: 'OK'
-				});
+				Swal.fire({ icon: 'error', title: title, text: text, confirmButtonText: 'OK' });
 			})();
 		</script>
 	</body>

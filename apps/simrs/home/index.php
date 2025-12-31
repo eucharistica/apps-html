@@ -1,7 +1,6 @@
 <?php
-require_once __DIR__ . '/../../config/bootstrap.php';
+require_once __DIR__ . '/../../auth/guard.php';
 
-// Guard: require login
 emr_require_login();
 
 $root = EMR_ROOT;
