@@ -129,7 +129,7 @@
             <!--begin::Item-->
             <div class="d-flex flex-stack">
                 <!--begin::Flag-->                    
-                <img src="assets/media/svg/brand-logos/dribbble-icon-1.svg" class="me-4 w-30px" style="border-radius: 4px" alt=""/>                     
+                <img src="../../../assets/media/svg/brand-logos/dribbble-icon-1.svg" class="me-4 w-30px" style="border-radius: 4px" alt=""/>                     
                 <!--end::Flag-->
                 <!--begin::Section-->
                 <div class="d-flex align-items-center flex-stack flex-wrap flex-row-fluid d-grid gap-2">
@@ -177,7 +177,7 @@
             <!--begin::Item-->
             <div class="d-flex flex-stack">
                 <!--begin::Flag-->                    
-                <img src="assets/media/svg/brand-logos/linkedin-1.svg" class="me-4 w-30px" style="border-radius: 4px" alt=""/>                     
+                <img src="../../../assets/media/svg/brand-logos/linkedin-1.svg" class="me-4 w-30px" style="border-radius: 4px" alt=""/>                     
                 <!--end::Flag-->
                 <!--begin::Section-->
                 <div class="d-flex align-items-center flex-stack flex-wrap flex-row-fluid d-grid gap-2">
@@ -225,7 +225,7 @@
             <!--begin::Item-->
             <div class="d-flex flex-stack">
                 <!--begin::Flag-->                    
-                <img src="assets/media/svg/brand-logos/slack-icon.svg" class="me-4 w-30px" style="border-radius: 4px" alt=""/>                     
+                <img src="../../../assets/media/svg/brand-logos/slack-icon.svg" class="me-4 w-30px" style="border-radius: 4px" alt=""/>                     
                 <!--end::Flag-->
                 <!--begin::Section-->
                 <div class="d-flex align-items-center flex-stack flex-wrap flex-row-fluid d-grid gap-2">
@@ -273,7 +273,7 @@
             <!--begin::Item-->
             <div class="d-flex flex-stack">
                 <!--begin::Flag-->                    
-                <img src="assets/media/svg/brand-logos/youtube-3.svg" class="me-4 w-30px" style="border-radius: 4px" alt=""/>                     
+                <img src="../../../assets/media/svg/brand-logos/youtube-3.svg" class="me-4 w-30px" style="border-radius: 4px" alt=""/>                     
                 <!--end::Flag-->
                 <!--begin::Section-->
                 <div class="d-flex align-items-center flex-stack flex-wrap flex-row-fluid d-grid gap-2">
@@ -321,7 +321,7 @@
             <!--begin::Item-->
             <div class="d-flex flex-stack">
                 <!--begin::Flag-->                    
-                <img src="assets/media/svg/brand-logos/instagram-2-1.svg" class="me-4 w-30px" style="border-radius: 4px" alt=""/>                     
+                <img src="../../../assets/media/svg/brand-logos/instagram-2-1.svg" class="me-4 w-30px" style="border-radius: 4px" alt=""/>                     
                 <!--end::Flag-->
                 <!--begin::Section-->
                 <div class="d-flex align-items-center flex-stack flex-wrap flex-row-fluid d-grid gap-2">

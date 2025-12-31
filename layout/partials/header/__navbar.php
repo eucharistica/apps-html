@@ -1,5 +1,4 @@
 <?php
-// layout/partials/header/__navbar.php
 $__emr_root = defined('EMR_ROOT') ? EMR_ROOT : realpath(__DIR__ . '/../../../');
 ?>
 <!--begin::Navbar-->

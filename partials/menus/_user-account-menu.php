@@ -1,3 +1,7 @@
+<?php
+$__emr_root = defined('EMR_ROOT') ? EMR_ROOT : realpath(__DIR__ . '/../../');
+?>
+
 <!--begin::User account menu-->
 <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-color fw-semibold py-4 fs-6 w-275px"
     data-kt-menu="true">
@@ -6,7 +10,7 @@
         <div class="menu-content d-flex align-items-center px-3">
             <!--begin::Avatar-->
             <div class="symbol symbol-50px me-5">
-                <img alt="Logo" src="assets/media/avatars/300-5.jpg" />
+                <img alt="Logo" src="../../../assets/media/avatars/300-5.jpg" />
             </div>
             <!--end::Avatar-->
             <!--begin::Username-->
@@ -46,7 +50,7 @@
             </span>
         </a>
 
-        <?php include 'partials/theme-mode/__menu.php' ?>
+        <?php include $__emr_root. '/partials/theme-mode/__menu.php' ?>
     </div>
     <!--end::Menu item-->
 

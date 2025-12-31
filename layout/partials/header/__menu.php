@@ -1,5 +1,4 @@
 <?php
-// layout/partials/header/__menu.php
 $__emr_root = defined('EMR_ROOT') ? EMR_ROOT : realpath(__DIR__ . '/../../../');
 ?>
 <!--begin::Menu wrapper-->
@@ -45,16 +44,7 @@ $__emr_root = defined('EMR_ROOT') ? EMR_ROOT : realpath(__DIR__ . '/../../../');
 				<span class="menu-link"><span class="menu-icon"><i class="ki-outline ki-abstract-41 fs-3"></i></span><span
 						class="menu-title">Apps</span><span class="menu-arrow d-lg-none"></span></span>
 				<div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown px-lg-2 py-lg-4 w-lg-250px">
-					<!--begin::Menu item-->
-					<div data-kt-menu-trigger="{default:'click', lg: 'hover'}" data-kt-menu-placement="right-start"
-						class="menu-item menu-lg-down-accordion">
-						<span class="menu-link"><span class="menu-icon"><i class="ki-outline ki-rocket fs-2"></i></span><span
-								class="menu-title">Projects</span><span class="menu-arrow"></span></span>
-						<div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown menu-active-bg px-lg-2 py-lg-4 w-lg-225px">
-							<div class="menu-item"><a class="menu-link" href="?page=apps/projects/list"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">My Projects</span></a></div>
-						</div>
-					</div>
-					<!--end::Menu item-->
+					<?php include $__emr_root . '/layout/partials/header/_menu/__apps.php'; ?>
 				</div>
 			</div>
 			<!--end:Menu item-->

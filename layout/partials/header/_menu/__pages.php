@@ -46,32 +46,32 @@
         <!--begin:Tab pane-->
         <div class="tab-pane active w-lg-1000px" id="kt_app_header_menu_pages_pages">
 
-            <?php include 'layout/partials/header/_menu/__pages-general.php' ?>
+            <?php include '__pages-general.php' ?>
 
         </div>
         <!--end:Tab pane-->
         <!--begin:Tab pane-->
         <div class="tab-pane  w-lg-600px" id="kt_app_header_menu_pages_account">
 
-            <?php include 'layout/partials/header/_menu/__pages-account.php' ?>
+            <?php include '__pages-account.php' ?>
         </div>
         <!--end:Tab pane-->
         <!--begin:Tab pane-->
         <div class="tab-pane  w-lg-1000px" id="kt_app_header_menu_pages_authentication">
 
-            <?php include 'layout/partials/header/_menu/__pages-authentication.php' ?>
+            <?php include '__pages-authentication.php' ?>
         </div>
         <!--end:Tab pane-->
         <!--begin:Tab pane-->
         <div class="tab-pane  w-lg-1000px" id="kt_app_header_menu_pages_utilities">
 
-            <?php include 'layout/partials/header/_menu/__pages-utilities.php' ?>
+            <?php include '__pages-utilities.php' ?>
         </div>
         <!--end:Tab pane-->
         <!--begin:Tab pane-->
         <div class="tab-pane  w-lg-500px" id="kt_app_header_menu_pages_widgets">
 
-            <?php include 'layout/partials/header/_menu/__pages-widgets.php' ?>
+            <?php include '__pages-widgets.php' ?>
         </div>
         <!--end:Tab pane-->
     </div>
