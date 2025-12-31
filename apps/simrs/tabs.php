@@ -79,26 +79,6 @@ try {
         exit;
     }
 
-    if ($action === 'close_other') {
-        if ($tabKey === '') {
-            http_response_code(400);
-            exit;
-        }
-
-        $pdo->prepare("DELETE FROM emr_user_tabs WHERE user_id = ? AND tab_key <> ?")->execute([$userId, $tabKey]);
-        $pdo->prepare("UPDATE emr_user_tabs SET is_active = 0 WHERE user_id = ?")->execute([$userId]);
-        $pdo->prepare("UPDATE emr_user_tabs SET is_active = 1 WHERE user_id = ? AND tab_key = ?")->execute([$userId, $tabKey]);
-
-        if ($returnJson) {
-            header('Content-Type: application/json');
-            echo json_encode(['ok' => true, 'redirect' => null]);
-            exit;
-        }
-
-        echo 'OK';
-        exit;
-    }
-
     if ($action === 'close_all') {
         $pdo->prepare("DELETE FROM emr_user_tabs WHERE user_id = ?")->execute([$userId]);
 
