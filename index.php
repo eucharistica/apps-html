@@ -1,6 +1,11 @@
+<?php
+require_once __DIR__ . '/apps/config/bootstrap.php';
+
+// If already logged in, skip login form
+emr_redirect_if_logged_in();
+?>
 <!DOCTYPE html>
 <html lang="en">
-	<!--begin::Head-->
 	<head>
 		<title>EMR SIMRS - Sign In</title>
 		<meta charset="utf-8" />
@@ -17,7 +22,6 @@
 			}
 		</script>
 	</head>
-	<!--end::Head-->
 	<body id="kt_body" class="app-blank">
 		<div class="d-flex flex-column flex-root" id="kt_app_root">
 			<div class="d-flex flex-column flex-lg-row flex-column-fluid">
