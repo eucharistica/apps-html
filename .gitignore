@@ -1,0 +1,2 @@
+# Ignore local env config
+apps/config/.env.php
