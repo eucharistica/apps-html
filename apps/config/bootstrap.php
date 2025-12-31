@@ -13,6 +13,10 @@ define('EMR_SIMRS_HOME', EMR_BASE_URL . 'apps/simrs/home/index.php');
 
 define('EMR_LOGIN_URL', EMR_BASE_URL);
 
+define('EMR_ERROR_403', EMR_BASE_URL . 'apps/simrs/errors/403.php');
+define('EMR_ERROR_404', EMR_BASE_URL . 'apps/simrs/errors/404.php');
+define('EMR_ERROR_500', EMR_BASE_URL . 'apps/simrs/errors/500.php');
+
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
