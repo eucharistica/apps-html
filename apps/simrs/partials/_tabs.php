@@ -59,7 +59,8 @@ foreach ($tabs as $t) {
     </div>
 </div>
 
-<script src="<?= EMR_BASE_URL ?>assets/plugins/custom/sortablejs/sortable.min.js"></script>
+<!-- <script src="<?= EMR_BASE_URL ?>assets/plugins/custom/sortablejs/sortable.min.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
     function emrTabsPost(action, tabKey, extra) {
         var body = 'action=' + encodeURIComponent(action) + '&return=1';
@@ -195,14 +196,12 @@ foreach ($tabs as $t) {
         var tabbar = document.getElementById('emr-tabbar-menu');
         if (!tabbar || typeof Sortable === 'undefined') return;
 
-        Sortable.create(tabbar, {
+        Sortable.create(document.getElementById('emr-tabbar-menu'), {
             animation: 150,
-            handle: '.emr-tablink',
+            direction: 'horizontal',
             draggable: '.emr-tablink',
-            ghostClass: 'bg-light',
-            onEnd: function (evt) {
-                // TODO: optional: send new order to server using emrTabsPost('reorder', null, { order: ... })
-            }
+            filter: '.emr-tab-close',
+            preventOnFilter: false
         });
     });
 </script>
