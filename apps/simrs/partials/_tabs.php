@@ -28,15 +28,12 @@ foreach ($tabs as $t) {
 
     .emr-tab-actions { flex:0 0 auto; }
 
-    /* IMPORTANT:
-       Jangan pakai display:none untuk iframe karena di sebagian browser bisa memicu reload.
-       Kita keep iframe tetap "hidup" dan hanya dipindah offscreen + disable pointer-events. */
+    /* Anti reload: jangan display:none untuk iframe */
     #emr-tab-content { background:#fff; position:relative; }
-
     #emr-tab-content iframe {
         position:absolute;
         top:0;
-        left:-100000px;          /* offscreen */
+        left:-100000px;
         width:100%;
         height:100%;
         border:0;
@@ -44,7 +41,6 @@ foreach ($tabs as $t) {
         opacity:0;
         pointer-events:none;
     }
-
     #emr-tab-content iframe.is-active {
         left:0;
         visibility:visible;
@@ -54,7 +50,6 @@ foreach ($tabs as $t) {
 </style>
 
 <div class="emr-tabbar">
-
     <div class="emr-tab-actions dropdown">
         <button class="btn btn-sm btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
             Close
@@ -121,7 +116,6 @@ foreach ($tabs as $t) {
             iframe.setAttribute('data-emr-tab-key', key);
             content.appendChild(iframe);
         }
-
         return iframe;
     }
 
@@ -142,15 +136,22 @@ foreach ($tabs as $t) {
         }
         if (idx === -1) return;
 
-        var positions = [idx, idx - 1, idx + 1];
-        positions.forEach(function (pos) {
+        [idx, idx - 1, idx + 1].forEach(function (pos) {
             if (pos < 0 || pos >= tabs.length) return;
-
             var el = tabs[pos];
-            var key = el.getAttribute('data-emr-tab-key');
-            var url = el.getAttribute('data-emr-tab-url');
-            emrEnsureIframe(key, url);
+            emrEnsureIframe(el.getAttribute('data-emr-tab-key'), el.getAttribute('data-emr-tab-url'));
         });
+    }
+
+    // Debounce update active tab ke DB
+    var __emrActivateTimer = null;
+    function emrPersistActiveToDb(key) {
+        if (!key) return;
+        if (__emrActivateTimer) clearTimeout(__emrActivateTimer);
+
+        __emrActivateTimer = setTimeout(function () {
+            emrTabsPost('activate', key).catch(function(){ /* ignore */ });
+        }, 150);
     }
 
     function emrActivateTab(key, url) {
@@ -172,6 +173,7 @@ foreach ($tabs as $t) {
         try { sessionStorage.setItem('emr_active_tab_key', key); } catch (e) {}
 
         emrPreloadNeighbors(key);
+        emrPersistActiveToDb(key);
     }
 
     document.addEventListener('click', function (e) {
@@ -205,7 +207,6 @@ foreach ($tabs as $t) {
         var tab = el.closest && el.closest('.emr-tablink');
         if (tab && tab.getAttribute('data-emr-tab') === '1') {
             e.preventDefault();
-
             var key = tab.getAttribute('data-emr-tab-key');
             var url = tab.getAttribute('data-emr-tab-url');
             emrActivateTab(key, url);
@@ -242,7 +243,7 @@ foreach ($tabs as $t) {
     document.addEventListener('DOMContentLoaded', function () {
         var active = document.querySelector('.emr-tablink.is-active');
 
-        // fallback (runtime only)
+        // fallback runtime only
         if (!active) {
             try {
                 var key = sessionStorage.getItem('emr_active_tab_key') || '';

@@ -13,7 +13,34 @@ $userId = (int)($_SESSION['emr_user']['id'] ?? 0);
 // Registry: page => [title, file, permission]
 $registry = require __DIR__ . '/registry.php';
 
-$page = (string)($_GET['page'] ?? 'dashboard');
+/**
+ * Jika masuk ke shell tanpa page yang eksplisit:
+ * redirect ke tab yang is_active=1 di DB supaya hard reload kembali ke tab terakhir.
+ */
+$pageParam = $_GET['page'] ?? null;
+$pageParam = is_string($pageParam) ? trim($pageParam) : null;
+
+if ($pageParam === null || $pageParam === '') {
+    try {
+        $stmt = $pdo->prepare("SELECT tab_key FROM emr_user_tabs WHERE user_id = ? AND is_active = 1 LIMIT 1");
+        $stmt->execute([$userId]);
+        $activeTabKey = $stmt->fetchColumn();
+
+        if (is_string($activeTabKey) && $activeTabKey !== '' && isset($registry[$activeTabKey])) {
+            header('Location: ' . EMR_BASE_URL . 'apps/simrs/index.php?page=' . urlencode($activeTabKey));
+            exit;
+        }
+    } catch (Throwable $e) {
+        // ignore
+    }
+
+    // fallback
+    header('Location: ' . EMR_BASE_URL . 'apps/simrs/index.php?page=dashboard');
+    exit;
+}
+
+$page = (string)$pageParam;
+
 if (!isset($registry[$page])) {
     header('Location: ' . EMR_ERROR_404);
     exit;
@@ -32,15 +59,16 @@ try {
     $stmt->execute([$userId]);
 
     // upsert current
-    $stmt = $pdo->prepare("INSERT INTO emr_user_tabs (user_id, tab_key, title, url, is_active, sort_order)
-        VALUES (?, ?, ?, ?, 1,
+    $stmt = $pdo->prepare(
+        "INSERT INTO emr_user_tabs (user_id, tab_key, title, url, is_active, sort_order)
+         VALUES (?, ?, ?, ?, 1,
             COALESCE((SELECT MAX(t.sort_order) + 1 FROM emr_user_tabs t WHERE t.user_id = ?), 1)
-        )
-        ON DUPLICATE KEY UPDATE title=VALUES(title), url=VALUES(url), is_active=1");
+         )
+         ON DUPLICATE KEY UPDATE title=VALUES(title), url=VALUES(url), is_active=1"
+    );
 
     $url = EMR_BASE_URL . 'apps/simrs/index.php?page=' . urlencode($page) . '&iframe=1';
     $stmt->execute([$userId, $page, $route['title'], $url, $userId]);
-
 } catch (Throwable $e) {
     // ignore tab persistence errors to not block app
 }
@@ -71,5 +99,6 @@ if (($_GET['iframe'] ?? '') === '1') {
     }
     exit;
 }
+
 // render full layout dengan toolbar, tabs, dll
 include $root . '/apps/simrs/layout/app.php';

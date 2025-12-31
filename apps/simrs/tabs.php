@@ -27,13 +27,43 @@ try {
     $pdo = emr_pdo();
     $userId = (int)($_SESSION['emr_user']['id'] ?? 0);
 
+    if ($action === 'activate') {
+        if ($tabKey === '') {
+            http_response_code(400);
+            exit;
+        }
+
+        // Pastikan tab milik user
+        $stmt = $pdo->prepare("SELECT id FROM emr_user_tabs WHERE user_id = ? AND tab_key = ? LIMIT 1");
+        $stmt->execute([$userId, $tabKey]);
+        $tab = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$tab || empty($tab['id'])) {
+            http_response_code(404);
+            exit;
+        }
+
+        $pdo->beginTransaction();
+        $pdo->prepare("UPDATE emr_user_tabs SET is_active = 0 WHERE user_id = ?")->execute([$userId]);
+        $pdo->prepare("UPDATE emr_user_tabs SET is_active = 1 WHERE user_id = ? AND tab_key = ?")->execute([$userId, $tabKey]);
+        $pdo->commit();
+
+        if ($returnJson) {
+            header('Content-Type: application/json');
+            echo json_encode(['ok' => true]);
+            exit;
+        }
+
+        echo 'OK';
+        exit;
+    }
+
     if ($action === 'close') {
         if ($tabKey === '') {
             http_response_code(400);
             exit;
         }
 
-        // Load info of the tab being closed
         $stmt = $pdo->prepare("SELECT id, is_active, sort_order FROM emr_user_tabs WHERE user_id = ? AND tab_key = ? LIMIT 1");
         $stmt->execute([$userId, $tabKey]);
         $tab = $stmt->fetch();
@@ -41,14 +71,12 @@ try {
         $wasActive = $tab ? ((int)$tab['is_active'] === 1) : false;
         $sort = $tab ? (int)$tab['sort_order'] : null;
 
-        // Delete tab
         $stmt = $pdo->prepare("DELETE FROM emr_user_tabs WHERE user_id = ? AND tab_key = ?");
         $stmt->execute([$userId, $tabKey]);
 
         $redirect = null;
 
         if ($wasActive) {
-            // Browser-like behavior: go to nearest left; if none, go to nearest right
             $stmt = $pdo->prepare("SELECT id, url FROM emr_user_tabs WHERE user_id = ? AND sort_order < ? ORDER BY sort_order DESC LIMIT 1");
             $stmt->execute([$userId, $sort]);
             $target = $stmt->fetch();
@@ -103,7 +131,6 @@ try {
             exit;
         }
 
-        // Unique, preserve order
         $seen = [];
         $ordered = [];
         foreach ($keys as $k) {
@@ -112,7 +139,6 @@ try {
             $ordered[] = $k;
         }
 
-        // Validate ownership
         $placeholders = implode(',', array_fill(0, count($ordered), '?'));
         $stmt = $pdo->prepare("SELECT tab_key FROM emr_user_tabs WHERE user_id = ? AND tab_key IN ($placeholders)");
         $stmt->execute(array_merge([$userId], $ordered));
@@ -123,7 +149,6 @@ try {
 
         $pdo->beginTransaction();
 
-        // Pin dashboard to left
         if (isset($validSet['dashboard'])) {
             $pdo->prepare("UPDATE emr_user_tabs SET sort_order = 0 WHERE user_id = ? AND tab_key = 'dashboard'")
                 ->execute([$userId]);

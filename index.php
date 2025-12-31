@@ -26,7 +26,7 @@ $csrf = emr_csrf_token();
 	<body id="kt_body" class="app-blank">
 		<div class="d-flex flex-column flex-root" id="kt_app_root">
 			<div class="d-flex flex-column flex-lg-row flex-column-fluid">
-				<a href="apps/simrs/home/index.php" class="d-block d-lg-none mx-auto py-20">
+				<a href="apps/simrs/index.php" class="d-block d-lg-none mx-auto py-20">
 					<img alt="Logo" src="assets/media/logos/default.svg" class="theme-light-show h-25px" />
 					<img alt="Logo" src="assets/media/logos/default-dark.svg" class="theme-dark-show h-25px" />
 				</a>
