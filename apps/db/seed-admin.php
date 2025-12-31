@@ -10,12 +10,41 @@ $username = 'admin';
 $passwordPlain = 'admin';
 $hash = password_hash($passwordPlain, PASSWORD_BCRYPT);
 
+// Default permission naming convention:
+// simrs.<module>.<action>
+$defaultPermissions = [
+    'simrs.dashboard.view',
+    'simrs.rawat_jalan.view',
+    'simrs.rawat_inap.view',
+];
+
 // Ensure role exists
 $pdo->exec("INSERT INTO emr_roles (name, created_at, updated_at)
             SELECT 'admin', NOW(), NOW()
             WHERE NOT EXISTS (SELECT 1 FROM emr_roles WHERE name='admin')");
 
 $roleId = $pdo->query("SELECT id FROM emr_roles WHERE name='admin' LIMIT 1")->fetchColumn();
+
+// Ensure permissions exist
+$permStmt = $pdo->prepare("INSERT INTO emr_permissions (name, created_at, updated_at)
+                           SELECT ?, NOW(), NOW()
+                           WHERE NOT EXISTS (SELECT 1 FROM emr_permissions WHERE name = ?)");
+
+foreach ($defaultPermissions as $p) {
+    $permStmt->execute([$p, $p]);
+}
+
+// Assign all default permissions to admin role
+$permIdStmt = $pdo->prepare("SELECT id FROM emr_permissions WHERE name = ? LIMIT 1");
+$assignStmt = $pdo->prepare("INSERT IGNORE INTO emr_role_has_permissions (role_id, permission_id) VALUES (?, ?)");
+
+foreach ($defaultPermissions as $p) {
+    $permIdStmt->execute([$p]);
+    $permId = $permIdStmt->fetchColumn();
+    if ($permId) {
+        $assignStmt->execute([$roleId, $permId]);
+    }
+}
 
 // Ensure user exists
 $stmt = $pdo->prepare("SELECT id FROM emr_users WHERE username=? LIMIT 1");
@@ -34,3 +63,4 @@ $stmt = $pdo->prepare("INSERT IGNORE INTO emr_user_has_roles (user_id, role_id) 
 $stmt->execute([$userId, $roleId]);
 
 echo "Seed admin OK. username=admin password=admin\n";
+echo "Seed permissions OK: " . implode(', ', $defaultPermissions) . "\n";

@@ -4,6 +4,9 @@ require_once __DIR__ . '/../../auth/rbac.php';
 
 emr_require_login();
 
+// Home/Dashboard permission
+emr_require_permission('simrs.dashboard.view');
+
 $root = EMR_ROOT;
 $asset = EMR_BASE_URL . 'assets/';
 ?>
