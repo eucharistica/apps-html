@@ -35,7 +35,7 @@ if ($pageParam === null || $pageParam === '') {
     }
 
     // fallback
-    header('Location: ' . EMR_BASE_URL . 'apps/simrs/index.php?page=dashboard');
+    header('Location: ' . EMR_BASE_URL . 'apps/simrs/index.php');
     exit;
 }
 
