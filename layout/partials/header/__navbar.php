@@ -1,3 +1,7 @@
+<?php
+// layout/partials/header/__navbar.php
+$__emr_root = defined('EMR_ROOT') ? EMR_ROOT : realpath(__DIR__ . '/../../../');
+?>
 <!--begin::Navbar-->
 <div class="app-navbar flex-shrink-0">
     <!--begin::User menu-->
@@ -9,7 +13,7 @@
             <i class="ki-outline ki-user fs-2"></i>
         </div>
 
-        <?php include 'partials/menus/_user-account-menu.php' ?>
+        <?php include $__emr_root . '/partials/menus/_user-account-menu.php'; ?>
         <!--end::Menu wrapper-->
     </div>
     <!--end::User menu-->
@@ -23,13 +27,9 @@
             <i class="ki-outline ki-element-11 fs-2"></i>
         </div>
 
-        <?php include 'partials/menus/_my-apps-menu.php' ?>
+        <?php include $__emr_root . '/partials/menus/_my-apps-menu.php'; ?>
         <!--end::Menu wrapper-->
     </div>
     <!--end::My apps links-->
-
-
-    <!--begin::Sidebar menu toggle-->
-    <!--end::Sidebar menu toggle-->
 </div>
 <!--end::Navbar-->
