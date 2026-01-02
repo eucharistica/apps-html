@@ -2,6 +2,8 @@
 // apps/auth/sign-out.php
 
 require_once __DIR__ . '/../config/bootstrap.php';
+require_once __DIR__ . '/../config/audit.php';
+emr_require_login();
 
 $_SESSION = [];
 
@@ -13,6 +15,7 @@ if (ini_get('session.use_cookies')) {
 }
 
 session_destroy();
+emr_audit('logout', 'User logged out');
 
 header('Location: ' . EMR_LOGIN_URL);
 exit;

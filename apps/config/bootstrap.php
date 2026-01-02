@@ -9,6 +9,8 @@ define('EMR_APP', EMR_ROOT . '/apps');
 
 define('EMR_BASE_URL', '/');
 
+define('EMR_HOME_URL', EMR_BASE_URL . 'apps/home');
+
 define('EMR_SIMRS_HOME', EMR_BASE_URL . 'apps/simrs/index.php');
 
 define('EMR_LOGIN_URL', EMR_BASE_URL);

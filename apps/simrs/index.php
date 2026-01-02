@@ -83,6 +83,7 @@ try {
 }
 
 // Expose variables for layout partials
+
 $root = EMR_ROOT;
 $asset = EMR_BASE_URL . 'assets/';
 $emr_tabs = $tabs;
@@ -100,5 +101,6 @@ if (($_GET['iframe'] ?? '') === '1') {
     exit;
 }
 
+$GLOBALS['EMR_USE_IFRAME_TABS'] = true;
 // render full layout dengan toolbar, tabs, dll
 include $root . '/apps/simrs/layout/app.php';

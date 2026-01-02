@@ -16,7 +16,6 @@ CREATE TABLE `emr_role_has_permissions`  (
 -- ----------------------------
 -- Table structure for emr_roles
 -- ----------------------------
-DROP TABLE IF EXISTS `emr_roles`;
 CREATE TABLE `emr_roles`  (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -29,7 +28,6 @@ CREATE TABLE `emr_roles`  (
 -- ----------------------------
 -- Table structure for emr_user_has_permissions
 -- ----------------------------
-DROP TABLE IF EXISTS `emr_user_has_permissions`;
 CREATE TABLE `emr_user_has_permissions`  (
   `user_id` bigint UNSIGNED NOT NULL,
   `permission_id` bigint UNSIGNED NOT NULL,
@@ -42,7 +40,6 @@ CREATE TABLE `emr_user_has_permissions`  (
 -- ----------------------------
 -- Table structure for emr_user_has_roles
 -- ----------------------------
-DROP TABLE IF EXISTS `emr_user_has_roles`;
 CREATE TABLE `emr_user_has_roles`  (
   `user_id` bigint UNSIGNED NOT NULL,
   `role_id` bigint UNSIGNED NOT NULL,
