@@ -5,16 +5,20 @@
 RewriteEngine On
 
 # deny direct access to env/config/db scripts
-RewriteRule ^apps/config/ - [F,L]
-RewriteRule ^apps/db/ - [F,L]
+# RewriteRule ^apps/config/ - [F,L]
+# RewriteRule ^apps/db/ - [F,L]
 </IfModule>
 
 # Disable directory listing
 Options -Indexes
 
 # Basic security headers
-<IfModule mod_headers.c>
-Header set X-Content-Type-Options "nosniff"
-Header set X-Frame-Options "SAMEORIGIN"
-Header set Referrer-Policy "strict-origin-when-cross-origin"
-</IfModule>
+# <IfModule mod_headers.c>
+# Header set X-Content-Type-Options "nosniff"
+# Header set X-Frame-Options "SAMEORIGIN"
+# Header set Referrer-Policy "strict-origin-when-cross-origin"
+# </IfModule>
+
+ErrorDocument 403 /errors/403.php
+ErrorDocument 404 /errors/404.php
+ErrorDocument 500 /errors/500.php
