@@ -232,9 +232,9 @@ foreach ($tabs as $t) {
                         window.location.href = data.redirect;
                         return;
                     }
-                    window.location.href = '<?= EMR_BASE_URL ?>apps/simrs/index.php';
+                    window.location.href = '<?= EMR_BASE_URL ?>apps/simrs/index.php?page=dashboard';
                 })
-                .catch(function(){ window.location.href = '<?= EMR_BASE_URL ?>apps/simrs/index.php'; });
+                .catch(function(){ window.location.href = '<?= EMR_BASE_URL ?>apps/simrs/index.php?page=dashboard'; });
             return;
         }
     }, true);

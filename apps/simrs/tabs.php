@@ -110,7 +110,7 @@ try {
     if ($action === 'close_all') {
         $pdo->prepare("DELETE FROM emr_user_tabs WHERE user_id = ?")->execute([$userId]);
 
-        $redirect = EMR_BASE_URL . 'apps/simrs/index.php';
+        $redirect = EMR_BASE_URL . 'apps/simrs/index.php?page=dashboard';
 
         if ($returnJson) {
             header('Content-Type: application/json');

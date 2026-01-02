@@ -10,11 +10,7 @@ $tabs = $GLOBALS['EMR_TABS'] ?? null;
     <div id="kt_app_toolbar_container" class="app-container container-xxl d-flex align-items-stretch ">
         <div class="app-toolbar-container d-flex flex-column flex-row-fluid">
             <div class="d-flex justify-content-between flex-wrap gap-4 gap-lg-10">
-                <?php if (is_array($tabs)) : ?>
-                    <?php include $__emr_root . '/apps/simrs/partials/_tabs.php'; ?>
-                <?php else: ?>
-                    <?php include $__emr_root . '/layout/partials/toolbar/_menu.php'; ?>
-                <?php endif; ?>
+                <?php include $__emr_root . '/apps/simrs/partials/_tabs.php'; ?>
             </div>
         </div>
     </div>

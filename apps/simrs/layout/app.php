@@ -72,8 +72,6 @@
 
     <script src="<?= $asset ?>js/widgets.bundle.js"></script>
     <script src="<?= $asset ?>js/custom/widgets.js"></script>
-    <script src="<?= $asset ?>js/custom/apps/chat/chat.js"></script>
-    <script src="<?= $asset ?>js/custom/utilities/modals/upgrade-plan.js"></script>
 
 </body>
 
