@@ -28,6 +28,9 @@ if ($permission) {
 $emrtitle = $route['title'] ?? 'Admin';
 
 // PASS ke global supaya bisa diakses di app.php
-$GLOBALS['EMR_CONTENT_FILE'] = $route['file'] ?? null;
-
+$file = $route['file'] ?? null;
+if ($file && !is_file($file)) {
+    $file = __DIR__ . '/' . $file;
+}
+$GLOBALS['EMR_CONTENT_FILE'] = $file;
 include __DIR__ . '/layout/app.php';
