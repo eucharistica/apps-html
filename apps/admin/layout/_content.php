@@ -1,7 +1,7 @@
 <?php
 $contentFile = $GLOBALS['EMR_CONTENT_FILE'] ?? null;
 if (is_string($contentFile) && file_exists($contentFile)):
-    include $contentFile;
+    // include $contentFile;
 else:
 ?>
     <div class="card">
