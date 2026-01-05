@@ -3,8 +3,13 @@
 
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once __DIR__ . '/../config/audit.php';
+
 emr_require_login();
 
+// Audit dulu (masih ada $_SESSION['emr_user'])
+emr_audit('logout', 'User logged out');
+
+// Lalu hancurkan session
 $_SESSION = [];
 
 if (ini_get('session.use_cookies')) {
@@ -15,7 +20,6 @@ if (ini_get('session.use_cookies')) {
 }
 
 session_destroy();
-emr_audit('logout', 'User logged out');
 
 header('Location: ' . EMR_LOGIN_URL);
 exit;
