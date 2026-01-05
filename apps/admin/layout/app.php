@@ -47,8 +47,6 @@ $asset = $asset ?? (defined('EMR_BASE_URL') ? EMR_BASE_URL . 'assets/' : '/asset
 $__emr_root = $root;
 $GLOBALS['EMR_TABS'] = null;
 $GLOBALS['EMR_USE_IFRAME_TABS'] = true;
-$GLOBALS['EMR_CONTENT_FILE'] = $GLOBALS['EMR_CONTENT_FILE'] ?? null;
-// Build toolbar for admin
 $__admin_registry = require __DIR__ . '/../registry.php';
 $__admin_menu = [];
 foreach ($__admin_registry as $key => $item) {
