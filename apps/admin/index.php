@@ -26,6 +26,8 @@ if ($permission) {
 }
 
 $emrtitle = $route['title'] ?? 'Admin';
-$emrcontent = $route['file'] ?? null;
+
+// PASS ke global supaya bisa diakses di app.php
+$GLOBALS['EMR_CONTENT_FILE'] = $route['file'] ?? null;
 
 include __DIR__ . '/layout/app.php';

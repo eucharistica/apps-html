@@ -1,8 +1,8 @@
 <?php
 // apps/admin/pages/users/list.php
 
-require_once __DIR__ . '/../../../../config/bootstrap.php';
-require_once __DIR__ . '/../../../../auth/rbac.php';
+require_once __DIR__ . '/../../../config/bootstrap.php';
+require_once __DIR__ . '/../../../auth/rbac.php';
 
 emr_require_permission('admin.users.view');
 

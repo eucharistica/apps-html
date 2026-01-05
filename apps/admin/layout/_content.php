@@ -1,15 +1,15 @@
 <?php
-// apps/admin/layout/_content.php
-$contentFile = $emrcontent ?? $GLOBALS['EMR_CONTENT_FILE'] ?? null;
+$contentFile = $GLOBALS['EMR_CONTENT_FILE'] ?? null;
+if (is_string($contentFile) && file_exists($contentFile)):
+    include $contentFile;
+else:
 ?>
-
-<div id="kt_app_content" class="app-content">
-    <?php if (is_string($contentFile) && file_exists($contentFile)): ?>
-        <?php include $contentFile; ?>
-    <?php else: ?>
-        <div class="alert alert-warning">
-            Content not found.<br>
-            Path: <?= htmlspecialchars($contentFile ?? 'undefined') ?>
+    <div class="card">
+        <div class="card-header border-0 pt-6">
+            <div class="card-title">Test Content</div>
         </div>
-    <?php endif; ?>
-</div>
+        <div class="card-body">
+            <p>File not found: <?= htmlspecialchars($contentFile ?? 'undefined') ?></p>
+        </div>
+    </div>
+<?php endif; ?>
