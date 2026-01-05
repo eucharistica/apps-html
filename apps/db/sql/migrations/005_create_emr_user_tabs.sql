@@ -4,7 +4,7 @@
 -- - url should store relative app URL (e.g. apps/simrs/index.php?page=dashboard)
 -- - key is a stable identifier (e.g. dashboard, rawat_jalan)
 
-CREATE TABLE emr_user_tabs (
+CREATE TABLE IF NOT EXISTS emr_user_tabs (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT UNSIGNED NOT NULL,
   tab_key VARCHAR(64) NOT NULL,

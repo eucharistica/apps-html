@@ -6,7 +6,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- Table structure for emr_audit_logs
 -- ----------------------------
 
-CREATE TABLE `emr_audit_logs`  (
+CREATE TABLE IF NOT EXISTS `emr_audit_logs`  (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` bigint UNSIGNED NULL DEFAULT NULL,
   `action` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE `emr_audit_logs`  (
 -- Table structure for emr_audit_changes
 -- ----------------------------
 
-CREATE TABLE `emr_audit_changes`  (
+CREATE TABLE IF NOT EXISTS `emr_audit_changes`  (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` bigint UNSIGNED NULL DEFAULT NULL,
   `entity_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
