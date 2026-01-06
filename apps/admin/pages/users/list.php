@@ -194,6 +194,8 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <!-- CSRF token -->
+<?php if (function_exists('emr_csrf_token')): ?>
 <input type="hidden" id="csrf_token" value="<?= emr_csrf_token() ?>">
+<?php endif; ?>
 
 <script src="<?= EMR_BASE_URL ?>apps/admin/pages/users/users.js"></script>
