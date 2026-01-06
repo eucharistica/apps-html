@@ -1,7 +1,11 @@
 <?php
 // apps/admin/layout/app.php
 
-$root  = $root  ?? (defined('EMR_ROOT') ? EMR_ROOT : realpath(__DIR__ . '/../../..'));
+header('X-Frame-Options: SAMEORIGIN');
+header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
+$root = $root ?? (defined('EMR_ROOT') ? EMR_ROOT : realpath(__DIR__ . '/../../..'));
 $asset = $asset ?? (defined('EMR_BASE_URL') ? EMR_BASE_URL . 'assets/' : '/assets/');
 ?>
 <!DOCTYPE html>
@@ -74,14 +78,14 @@ $GLOBALS['EMR_ADMIN_MENU'] = $__admin_menu;
                 <div class="app-container container-xxl d-flex align-items-center">
                     <ul class="nav nav-tabs nav-line-tabs nav-line-tabs-2x border-0 fs-6 fw-semibold" role="tablist">
                         <?php foreach ($__admin_menu as $item): ?>
-                            <?php $isActive = ($_GET['page'] ?? 'users') === $item['key']; ?>
-                            <li class="nav-item" role="presentation">
-                                <a href="<?= htmlspecialchars($item['url']) ?>" 
-                                   class="nav-link <?= $isActive ? 'active' : '' ?>" 
-                                   role="tab">
-                                    <?= htmlspecialchars($item['title']) ?>
-                                </a>
-                            </li>
+                                <?php $isActive = ($_GET['page'] ?? 'users') === $item['key']; ?>
+                                <li class="nav-item" role="presentation">
+                                    <a href="<?= htmlspecialchars($item['url']) ?>" 
+                                       class="nav-link <?= $isActive ? 'active' : '' ?>" 
+                                       role="tab">
+                                        <?= htmlspecialchars($item['title']) ?>
+                                    </a>
+                                </li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
@@ -116,6 +120,11 @@ $GLOBALS['EMR_ADMIN_MENU'] = $__admin_menu;
 <?php include $root . '/partials/_scrolltop.php'; ?>
 
 <script>var hostUrl = "<?= $asset ?>";</script>
+<script>
+    window.EMR = {
+        baseUrl: "<?= EMR_BASE_URL ?>"
+    };
+</script>
 <script src="<?= $asset ?>plugins/global/plugins.bundle.js"></script>
 <script src="<?= $asset ?>js/scripts.bundle.js"></script>
 

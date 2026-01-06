@@ -5,16 +5,17 @@ return [
     'users' => [
         'title' => 'Users',
         'permission' => 'admin.users.view',
-        'file' => __DIR__ . '/pages/users/list.php',
+        'file' => './pages/users/list.php',  // Path relative dari index.php
     ],
     'roles' => [
         'title' => 'Roles',
         'permission' => 'admin.roles.view',
-        'file' => __DIR__ . '/pages/roles/list.php',
+        'file' => './pages/roles/list.php',
     ],
     'permissions' => [
         'title' => 'Permissions',
         'permission' => 'admin.permissions.view',
-        'file' => __DIR__ . '/pages/permissions/list.php',
+        'file' => './pages/permissions/list.php',
     ],
 ];
+

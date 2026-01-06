@@ -12,11 +12,18 @@ $root  = EMR_ROOT;
 $asset = EMR_BASE_URL . 'assets/';
 
 $page = $_GET['page'] ?? 'users';
+// Di awal index.php setelah $page assignment
+error_log("Loading page: " . $page . " at " . date('Y-m-d H:i:s'));
+
 $registry = require __DIR__ . '/registry.php';
 
 if (!isset($registry[$page])) {
-    header('Location: ' . EMR_BASE_URL . 'errors/404.php');
-    exit;
+    // Fallback ke default jika page tidak ditemukan di registry
+    $page = 'users'; // atau halaman default Anda
+    if (!isset($registry[$page])) {
+        header('Location: ' . EMR_BASE_URL . 'errors/404.php');
+        exit;
+    }
 }
 
 $route = $registry[$page];
@@ -25,8 +32,30 @@ if ($permission) {
     emr_require_permission($permission);
 }
 
-$emrtitle = $route['title'] ?? 'Admin';
+// Tentukan content file path lebih eksplisit
+$route = $registry[$page];
+$permission = $route['permission'] ?? null;
 
-// PASS ke global supaya bisa diakses di app.php
-$GLOBALS['EMR_CONTENT_FILE'] = $route['file'] ?? null;$file;
+if ($permission) {
+    emr_require_permission($permission);
+}
+
+$emtitle = $route['title'] ?? 'Admin';
+
+// PENTING: Set content file path sebelum include layout
+if (isset($route['file'])) {
+    $contentFilePath = realpath(__DIR__ . '/' . $route['file']);
+    
+    // Validasi path - jangan include file di luar direktori apps/admin
+    $basePath = realpath(__DIR__);
+    if ($contentFilePath && strpos($contentFilePath, $basePath) === 0 && file_exists($contentFilePath)) {
+        $GLOBALS['EMR_CONTENT_FILE'] = $contentFilePath;
+    } else {
+        $GLOBALS['EMR_CONTENT_FILE'] = null;
+    }
+} else {
+    $GLOBALS['EMR_CONTENT_FILE'] = null;
+}
+
+// Sekarang include layout
 include __DIR__ . '/layout/app.php';

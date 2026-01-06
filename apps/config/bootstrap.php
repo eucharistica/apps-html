@@ -43,3 +43,5 @@ function emr_redirect_if_logged_in(): void
         exit;
     }
 }
+
+require_once __DIR__ . '/database.php';

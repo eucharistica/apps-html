@@ -1,8 +1,14 @@
 <?php
 // apps/admin/pages/users/api/delete-user.php
 
-require_once __DIR__ . '/../../../../../config/bootstrap.php';
-require_once __DIR__ . '/../../../../../auth/rbac.php';
+require_once __DIR__ . '/../../../../config/bootstrap.php';
+require_once __DIR__ . '/../../../../auth/rbac.php';
+
+// Validasi CSRF
+$token = $_POST['_csrf'] ?? null;
+if (!emr_csrf_validate($token)) {
+    return_json_error('Invalid CSRF token', 403);
+}
 
 header('Content-Type: application/json');
 
