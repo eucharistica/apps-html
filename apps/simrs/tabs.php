@@ -2,8 +2,6 @@
 // apps/simrs/tabs.php
 
 require_once __DIR__ . '/../auth/guard.php';
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../config/security.php';
 
 emr_require_login();
 
@@ -39,8 +37,9 @@ try {
         $tab = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$tab || empty($tab['id'])) {
-            http_response_code(404);
-            exit;
+            // Fallback: Jika tab tidak ditemukan, redirect ke index dengan pesan
+                header('Location: ' . EMR_BASE_URL . 'apps/simrs/index.php');
+                exit;
         }
 
         $pdo->beginTransaction();

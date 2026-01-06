@@ -3,7 +3,6 @@
 
 require_once __DIR__ . '/../../../../config/bootstrap.php';
 require_once __DIR__ . '/../../../../auth/rbac.php';
-require_once EMR_ROOT . '/apps/config/response.php';
 
 header('Content-Type: application/json');
 

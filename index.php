@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/apps/auth/guest.php';
-require_once __DIR__ . '/apps/config/security.php';
 
 emr_redirect_if_logged_in();
 $csrf = emr_csrf_token();

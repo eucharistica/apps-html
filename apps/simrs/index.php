@@ -25,6 +25,33 @@ if ($pageParam === null || $pageParam === '') {
         $stmt = $pdo->prepare("SELECT tab_key FROM emr_user_tabs WHERE user_id = ? AND is_active = 1 LIMIT 1");
         $stmt->execute([$userId]);
         $activeTabKey = $stmt->fetchColumn();
+                    // Guard: Jika user belum punya data tabs, buat default dashboard
+            if (empty($activeTabKey)) {
+                // Cek apakah ada tab yang bisa digunakan sebagai default
+                $defaultTabStmt = $pdo->prepare("SELECT id, tab_key, title, url FROM emr_user_tabs WHERE user_id = ? LIMIT 1");
+                $defaultTabStmt->execute([$userId]);
+                $defaultTab = $defaultTabStmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($defaultTab) {
+                    // Jika ada tab, gunakan sebagai default dan redirect
+                    header('Location: ' . EMR_BASE_URL . 'apps/simrs/index.php?page=' . urlencode($defaultTab['tab_key']));
+                    exit;
+                } else {
+                    // Jika belum ada tab sama sekali, buat default dashboard tab
+                    $insertStmt = $pdo->prepare("INSERT INTO emr_user_tabs (user_id, tab_key, title, url, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?)");
+                    $insertStmt->execute([
+                        $userId,
+                        'dashboard',
+                        'Dashboard',
+                        'apps/simrs/pages/dashboard.php',
+                        1,
+                        1
+                    ]);
+                    // Redirect ke dashboard default
+                    header('Location: ' . EMR_BASE_URL . 'apps/simrs/index.php?page=dashboard');
+                    exit;
+                }
+            }
 
         if (is_string($activeTabKey) && $activeTabKey !== '' && isset($registry[$activeTabKey])) {
             header('Location: ' . EMR_BASE_URL . 'apps/simrs/index.php?page=' . urlencode($activeTabKey));

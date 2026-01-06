@@ -1,5 +1,6 @@
 <?php
 // apps/home/page.php
+
 $apps = $GLOBALS['EMR_HOME_APPS'] ?? [];
 ?>
 

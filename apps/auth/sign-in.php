@@ -2,7 +2,6 @@
 // apps/auth/sign-in.php
 
 require_once __DIR__ . '/../config/bootstrap.php';
-require_once __DIR__ . '/../config/audit.php';
 
 $pdo = emr_pdo();
 

@@ -1,8 +1,6 @@
 <?php
 // apps/config/security.php
 
-require_once __DIR__ . '/bootstrap.php';
-
 /**
  * Generate (or return existing) CSRF token for current session.
  */

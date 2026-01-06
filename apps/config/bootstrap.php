@@ -39,9 +39,12 @@ function emr_require_login(): void
 function emr_redirect_if_logged_in(): void
 {
     if (emr_is_logged_in()) {
-        header('Location: ' . EMR_SIMRS_HOME);
+        header('Location: ' . EMR_HOME_URL);
         exit;
     }
 }
 
 require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/security.php';
+require_once __DIR__ . '/response.php';
+require_once __DIR__ . '/audit.php';

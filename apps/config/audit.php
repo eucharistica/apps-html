@@ -1,9 +1,6 @@
 <?php
 // apps/config/audit.php
 
-require_once __DIR__ . '/database.php';
-require_once __DIR__ . '/bootstrap.php';
-
 function emr_audit(string $action, ?string $message = null, array $meta = []): void
 {
     try {
