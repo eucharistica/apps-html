@@ -36,21 +36,28 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <div class="card-body pt-0">
-        <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
+        <!--begin::Table-->
+        <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_table_users">
             <thead>
-                <tr class="fw-bold text-muted">
+                <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
                     <th>Name</th>
                     <th>Username</th>
                     <th>Email</th>
                     <th>Roles</th>
                     <th>Status</th>
-                    <th class="text-end">Actions</th>
+                    <th class="text-end min-w-100px">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="text-gray-600 fw-semibold">
                 <?php foreach ($users as $user): ?>
                     <tr>
-                        <td><?= htmlspecialchars($user['name'] ?? '-') ?></td>
+                        <td class="d-flex align-items-center">
+                            <div class="d-flex flex-column">
+                                <span class="text-gray-800 text-hover-primary mb-1">
+                                    <?= htmlspecialchars($user['name'] ?? '-') ?>
+                                </span>
+                            </div>
+                        </td>
                         <td><?= htmlspecialchars($user['username']) ?></td>
                         <td><?= htmlspecialchars($user['email'] ?? '-') ?></td>
                         <td>
@@ -61,7 +68,7 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <?php endif; ?>
                         </td>
                         <td>
-                            <span class="badge badge-light-<?= $user['status']==='active' ? 'success' : 'danger' ?>">
+                            <span class="badge badge-light-<?= $user['status'] === 'active' ? 'success' : 'danger' ?>">
                                 <?= ucfirst($user['status']) ?>
                             </span>
                         </td>
@@ -97,6 +104,7 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?php endforeach; ?>
             </tbody>
         </table>
+        <!--end::Table-->
     </div>
 </div>
 
@@ -141,59 +149,10 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Create User</button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-<!-- Edit User Modal -->
-<div class="modal fade" id="editUserModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit User</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="editUserForm" autocomplete="off">
-                <input type="hidden" name="user_id">
-                <div class="modal-body">
-                    <div class="mb-3"><label class="form-label">Name</label><input type="text" name="name" class="form-control" required></div>
-                    <div class="mb-3">
-                        <label class="form-label">Username</label>
-                        <input type="text" name="username" class="form-control" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')">
-                    </div>
-                    <div class="mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control"></div>
-                    <div class="mb-3"><label class="form-label">Password (leave empty to keep current)</label><input type="password" name="password" class="form-control" autocomplete="new-password"></div>
-                    <div class="mb-3">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-select">
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Role</label>
-                        <select name="role_id" class="form-select">
-                            <option value="">No Role</option>
-                            <?php foreach ($roles as $role): ?>
-                                <option value="<?= $role['id'] ?>"><?= htmlspecialchars($role['name']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- CSRF token -->
-<input type="hidden" id="csrf_token" value="<?= emr_csrf_token() ?>">
-
-<script src="<?= EMR_BASE_URL ?>apps/admin/pages/users/users.js"></script>
