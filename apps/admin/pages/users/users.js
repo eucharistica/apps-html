@@ -36,21 +36,79 @@ function editUser(userId) {
 }
 
 function deleteUser(userId) {
-    if (!confirm('Are you sure?')) return;
-
     const csrf = document.getElementById('csrf_token')?.value || '';
 
-    fetch(`${window.EMR.baseUrl}apps/admin/pages/users/api/delete-user.php`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `user_id=${userId}&_csrf=${csrf}`
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) location.reload();
-        else alert(data.message || 'Error deleting user');
+    Swal.fire({
+        icon: 'warning',
+        title: 'Hapus user?',
+        text: 'Data yang sudah dihapus tidak bisa dikembalikan.',
+        showCancelButton: true,
+        buttonsStyling: !1,
+        confirmButtonText: 'Ya, hapus',
+        cancelButtonText: 'Batal',
+        customClass: {
+            confirmButton: "btn btn-danger",
+            cancelButton: "btn btn-secondary"
+        }
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        // Optional: tampilkan loading di Swal saat proses request
+        Swal.fire({
+            title: 'Memproses...',
+            text: 'Sedang menghapus user',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        fetch(`${window.EMR.baseUrl}apps/admin/pages/users/api/delete-user.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `user_id=${encodeURIComponent(userId)}&_csrf=${encodeURIComponent(csrf)}`
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: data.message || 'User berhasil dihapus',
+                    buttonsStyling: !1,
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: "btn btn-primary"
+                    }
+                }).then(() => location.reload());
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: data.message || 'Gagal menghapus user',
+                    buttonsStyling: !1,
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: "btn btn-primary"
+                    }
+                });
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Terjadi kesalahan saat menghapus user',
+                buttonsStyling: !1,
+                confirmButtonText: 'OK',
+                customClass: {
+                    confirmButton: "btn btn-primary"
+                }
+            });
+        });
     });
 }
+
 
 function disableSubmit(form, loading = true) {
     const btn = form.querySelector('button[type="submit"]');
@@ -77,11 +135,42 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(r => r.json())
         .then(data => {
-            if (data.success) location.reload();
-            else alert(data.message);
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: data.message || 'User berhasil dibuat',
+                    buttonsStyling: !1,
+                    confirmButtonText: 'OK',
+                    customClass: {
+                            confirmButton: "btn btn-primary"
+                        }
+                }).then(() => location.reload());
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: data.message || 'Gagal membuat user',
+                    buttonsStyling: !1,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#d33'
+                });
+            }
+        })
+        .catch(err => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Terjadi kesalahan saat membuat user',
+                buttonsStyling: !1,
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#d33'
+            });
+            console.error(err);
         })
         .finally(() => disableSubmit(e.target, false));
     });
+
 
     if (editForm) editForm.addEventListener('submit', e => {
         e.preventDefault();
@@ -97,8 +186,38 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(r => r.json())
         .then(data => {
-            if (data.success) location.reload();
-            else alert(data.message);
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: data.message || 'Update user berhasil',
+                    buttonsStyling: !1,
+                    confirmButtonText: 'OK',
+                    customClass: {
+                            confirmButton: "btn btn-primary"
+                        }
+                }).then(() => location.reload());
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: data.message || 'Gagal update user',
+                    buttonsStyling: !1,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#d33'
+                });
+            }
+        })
+        .catch(err => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Terjadi kesalahan saat update user',
+                buttonsStyling: !1,
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#d33'
+            });
+            console.error(err);
         })
         .finally(() => disableSubmit(e.target, false));
     });

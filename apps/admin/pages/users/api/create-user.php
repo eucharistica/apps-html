@@ -55,7 +55,8 @@ try {
 
     emr_audit('admin.user_created', 'Created user: ' . $username);
 
-    return_json_success('User created');
+    emr_json_success([], 'User berhasil dibuat');
+
 } catch (Exception $e) {
     $pdo->rollBack();
     return_json_error('Failed to create user: ' . $e->getMessage());

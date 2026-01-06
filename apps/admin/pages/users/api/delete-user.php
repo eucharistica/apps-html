@@ -42,7 +42,8 @@ try {
 
     emr_audit('admin.user_deleted', 'Deleted user ID: ' . $user_id);
 
-    echo json_encode(['success' => true, 'message' => 'User deleted']);
+    emr_json_success([], 'User berhasil dihapus');
+
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
