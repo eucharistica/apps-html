@@ -11,10 +11,8 @@ return [
                 'plugins/custom/datatables/datatables.bundle.css',
             ],
             'js' => [
-                '/../apps/admin/pages/users/users.js',
+                'js/custom/admin/user-management/users/users.js',
                 'plugins/custom/datatables/datatables.bundle.js',
-                'js/custom/apps/user-management/users/list/table.js',
-                'js/custom/apps/user-management/users/list/export-users.js',
             ],
         ],
     ],
