@@ -30,11 +30,11 @@ return [
     'order' => 40,
   ],
   'admin' => [
-        'title' => 'Admin',
-        'subtitle' => 'Kelola user, role, permission',
-        'icon' => 'ki-outline ki-setting-2',
-        'url' => 'apps/admin/index.php',
-        'permission' => 'admin.access', // wajib admin
-        'order' => 5,
-    ],
+    'title' => 'Admin',
+    'subtitle' => 'Kelola user, role, permission',
+    'icon' => 'ki-outline ki-setting-2',
+    'url' => 'apps/admin/index.php',
+    'permission' => 'admin.access',
+    'order' => 5,
+  ],
 ];

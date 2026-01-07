@@ -25,91 +25,32 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <div class="card">
     <div class="card-header border-0 pt-6">
-        <div class="card-title">
-            <h2 class="d-flex align-items-center">Users Management</h2>
-        </div>
+        <div class="card-title">Users Management</div>
         <div class="card-toolbar">
-            <div class="d-flex justify-content-end" data-kt-user-table-toolbar="base">
-                <!--begin::Search-->
-                <div class="d-flex align-items-center position-relative my-1 me-4">
-                    <i class="ki-outline ki-magnifier fs-3 position-absolute ms-5"></i>
-                    <input type="text" data-kt-user-table-filter="search" class="form-control form-control-solid w-250px ps-13" placeholder="Search user" />
-                </div>
-                <!--end::Search-->
-
-                <!--begin::Filter-->
-                <button type="button" class="btn btn-light-primary me-3" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
-                    <i class="ki-outline ki-filter fs-2"></i>Filter
+            <?php if (emr_can('admin.users.create')): ?>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    <i class="ki-outline ki-plus fs-2"></i> Add User
                 </button>
-
-                <!--begin::Filter menu-->
-                <div class="menu menu-sub menu-sub-dropdown w-300px w-md-325px" data-kt-menu="true">
-                    <div class="px-7 py-5">
-                        <div class="fs-5 text-gray-900 fw-bold">Filter Options</div>
-                    </div>
-                    <div class="separator border-gray-200"></div>
-
-                    <div class="px-7 py-5" data-kt-user-table-filter="form">
-                        <div class="mb-10">
-                            <label class="form-label fs-6 fw-semibold">Status:</label>
-                            <select class="form-select form-select-solid fw-bold" data-kt-select2="true" data-placeholder="Select option" data-allow-clear="true">
-                                <option></option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-10">
-                            <label class="form-label fs-6 fw-semibold">Role:</label>
-                            <select class="form-select form-select-solid fw-bold" data-kt-select2="true" data-placeholder="Select option" data-allow-clear="true">
-                                <option></option>
-                                <?php foreach ($roles as $role): ?>
-                                    <option value="<?= htmlspecialchars($role['name']) ?>"><?= htmlspecialchars($role['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="d-flex justify-content-end">
-                            <button type="button" class="btn btn-light btn-active-light-primary fw-semibold me-2 px-6" data-kt-user-table-filter="reset">Reset</button>
-                            <button type="button" class="btn btn-primary fw-semibold px-6" data-kt-user-table-filter="filter">Apply</button>
-                        </div>
-                    </div>
-                </div>
-                <!--end::Filter menu-->
-                <!--end::Filter-->
-
-                <?php if (emr_can('admin.users.create')): ?>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                        <i class="ki-outline ki-plus fs-2"></i> Add User
-                    </button>
-                <?php endif; ?>
-            </div>
+            <?php endif; ?>
         </div>
     </div>
 
     <div class="card-body pt-0">
-        <!--begin::Table-->
-        <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_table_users">
+        <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
             <thead>
-                <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
+                <tr class="fw-bold text-muted">
                     <th>Name</th>
                     <th>Username</th>
                     <th>Email</th>
                     <th>Roles</th>
                     <th>Status</th>
-                    <th class="text-end min-w-100px">Actions</th>
+                    <th class="text-end">Actions</th>
                 </tr>
             </thead>
-            <tbody class="text-gray-600 fw-semibold">
+            <tbody>
                 <?php foreach ($users as $user): ?>
                     <tr>
-                        <td class="d-flex align-items-center">
-                            <div class="d-flex flex-column">
-                                <span class="text-gray-800 text-hover-primary mb-1">
-                                    <?= htmlspecialchars($user['name'] ?? '-') ?>
-                                </span>
-                            </div>
-                        </td>
+                        <td><?= htmlspecialchars($user['name'] ?? '-') ?></td>
                         <td><?= htmlspecialchars($user['username']) ?></td>
                         <td><?= htmlspecialchars($user['email'] ?? '-') ?></td>
                         <td>
@@ -120,7 +61,7 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <?php endif; ?>
                         </td>
                         <td>
-                            <span class="badge badge-light-<?= $user['status'] === 'active' ? 'success' : 'danger' ?>">
+                            <span class="badge badge-light-<?= $user['status']==='active' ? 'success' : 'danger' ?>">
                                 <?= ucfirst($user['status']) ?>
                             </span>
                         </td>
@@ -156,7 +97,6 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?php endforeach; ?>
             </tbody>
         </table>
-        <!--end::Table-->
     </div>
 </div>
 
@@ -201,8 +141,8 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create User</button>
                 </div>
             </form>
         </div>
@@ -218,21 +158,15 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="editUserForm" autocomplete="off">
+                <input type="hidden" name="user_id">
                 <div class="modal-body">
-                    <input type="hidden" name="user_id" value="">
-
-                    <div class="mb-3">
-                        <label class="form-label">Name</label>
-                        <input type="text" name="name" class="form-control" required>
-                    </div>
+                    <div class="mb-3"><label class="form-label">Name</label><input type="text" name="name" class="form-control" required></div>
                     <div class="mb-3">
                         <label class="form-label">Username</label>
-                        <input type="text" name="username" class="form-control" required>
+                        <input type="text" name="username" class="form-control" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-control">
-                    </div>
+                    <div class="mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control"></div>
+                    <div class="mb-3"><label class="form-label">Password (leave empty to keep current)</label><input type="password" name="password" class="form-control" autocomplete="new-password"></div>
                     <div class="mb-3">
                         <label class="form-label">Status</label>
                         <select name="status" class="form-select">
@@ -243,7 +177,7 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <div class="mb-3">
                         <label class="form-label">Role</label>
                         <select name="role_id" class="form-select">
-                            <option value="">Select Role</option>
+                            <option value="">No Role</option>
                             <?php foreach ($roles as $role): ?>
                                 <option value="<?= $role['id'] ?>"><?= htmlspecialchars($role['name']) ?></option>
                             <?php endforeach; ?>
@@ -251,7 +185,7 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Changes</button>
                 </div>
             </form>
@@ -259,6 +193,7 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 
-<!-- Users page script -->
-<script src="assets/plugins/custom/datatables/datatables.bundle.js"></script>
-<script src="apps/admin/pages/users/users.js"></script>
+<!-- CSRF token -->
+<input type="hidden" id="csrf_token" value="<?= emr_csrf_token() ?>">
+
+<script src="<?= EMR_BASE_URL ?>apps/admin/pages/users/users.js"></script>
