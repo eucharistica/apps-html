@@ -1,7 +1,6 @@
 "use strict";
 
 (function () {
-  // ---------- Helpers ----------
   const qs = (sel, root = document) => root.querySelector(sel);
 
   function emrUrl(path) {
@@ -19,7 +18,6 @@
     btn.innerText = loading ? "Processing..." : labelIdle;
   }
 
-  // ---------- DataTable + UI ----------
   const UsersTable = (function () {
     let dt = null;
     let tableEl = null;
@@ -29,15 +27,13 @@
       if (!tableEl) return;
       if (typeof $ === "undefined" || !$.fn?.DataTable) return;
 
-      // 6 kolom: Name, Username, Email, Roles, Status, Actions
       dt = $(tableEl).DataTable({
         info: false,
         order: [],
         pageLength: 10,
         lengthChange: false,
 
-        // Buttons export (akan aktif jika Buttons extension tersedia)
-        dom: "<'row'<'col-12'B>>" + "rt" + "<'row'<'col-12'p>>",
+        dom: "<'row'<'col-12'B>>rt<'row'<'col-12'p>>",
         buttons: [
           { extend: "copyHtml5", title: "Users" },
           { extend: "csvHtml5", title: "Users" },
@@ -51,8 +47,6 @@
         ],
       });
 
-      // Sembunyikan tombol default Buttons (kita trigger dari modal)
-      // Aman walau Buttons tidak ada, karena container mungkin null
       $(dt.buttons().container()).addClass("d-none");
     }
 
@@ -65,8 +59,7 @@
       });
     }
 
-    // Filter role: gunakan "column search" untuk kolom Roles (index 3)
-    // Lebih akurat daripada dt.search(global) karena cuma match di kolom roles. [web:53]
+    // Filter role -> column Roles index 2
     function bindFilterRole() {
       const form = qs('[data-kt-user-table-filter="form"]');
       const btnApply = qs('[data-kt-user-table-filter="filter"]', form || document);
@@ -77,8 +70,7 @@
 
       if (btnApply) {
         btnApply.addEventListener("click", () => {
-          const val = roleSelect.value || "";
-          dt.column(3).search(val).draw(); // Roles column
+          dt.column(2).search(roleSelect.value || "").draw();
         });
       }
 
@@ -87,7 +79,7 @@
           if (typeof $ !== "undefined") $(roleSelect).val("").trigger("change");
           else roleSelect.value = "";
 
-          dt.column(3).search("").draw();
+          dt.column(2).search("").draw();
           dt.search("").draw();
         });
       }
@@ -95,21 +87,10 @@
 
     function exportByFormat(format) {
       if (!dt) return;
-
-      // Mapping format modal -> Buttons index
-      // urutan sesuai konfigurasi buttons di atas
-      const map = {
-        copy: 0,
-        csv: 1,
-        excel: 2,
-        pdf: 3,
-        print: 4,
-      };
-
+      const map = { copy: 0, csv: 1, excel: 2, pdf: 3, print: 4 };
       const idx = map[format];
       if (typeof idx === "undefined") return;
-
-      dt.button(idx).trigger(); // cara umum trigger tombol export DataTables [web:44]
+      dt.button(idx).trigger();
     }
 
     return {
@@ -119,13 +100,9 @@
         bindFilterRole();
       },
       exportByFormat,
-      getDt() {
-        return dt;
-      },
     };
   })();
 
-  // ---------- Export Modal (real export) ----------
   const ExportModal = (function () {
     function init() {
       const modalEl = document.getElementById("kt_modal_export_users");
@@ -143,7 +120,6 @@
       }
 
       function getFormat() {
-        // name="format" di HTML modal kamu
         return form?.querySelector('[name="format"]')?.value || "";
       }
 
@@ -164,24 +140,8 @@
             return;
           }
 
-          // catatan: di HTML kamu ada "cvs" harusnya "csv"
-          const normalized = format === "cvs" ? "csv" : format;
-
-          // trigger export beneran
-          try {
-            UsersTable.exportByFormat(normalized); // DataTables Buttons [web:41]
-            closeModal();
-          } catch (err) {
-            console.error(err);
-            Swal.fire({
-              icon: "error",
-              title: "Export gagal",
-              text: "Buttons extension DataTables belum tersedia / belum ter-load.",
-              buttonsStyling: false,
-              confirmButtonText: "OK",
-              customClass: { confirmButton: "btn btn-primary" },
-            });
-          }
+          UsersTable.exportByFormat(format);
+          closeModal();
         });
       }
 
@@ -213,7 +173,6 @@
     return { init };
   })();
 
-  // ---------- CRUD actions (Edit/Delete/Create/Update) ----------
   async function editUser(userId) {
     try {
       const res = await fetch(emrUrl(`apps/admin/pages/users/api/get-users.php?id=${encodeURIComponent(userId)}`));
@@ -284,7 +243,6 @@
             confirmButtonText: "OK",
             customClass: { confirmButton: "btn btn-primary" },
           });
-
           location.reload();
         } else {
           Swal.fire({
@@ -310,12 +268,12 @@
     });
   }
 
-  // event delegation edit/delete
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-action]");
     if (!btn) return;
 
     e.preventDefault();
+
     const userId = btn.dataset.userId;
     const action = btn.dataset.action;
 
@@ -325,7 +283,6 @@
     if (action === "delete") deleteUser(userId);
   });
 
-  // create/update submit
   function bindForms() {
     const addForm = document.getElementById("addUserForm");
     const editForm = document.getElementById("editUserForm");
@@ -435,14 +392,12 @@
     }
   }
 
-  // ---------- Boot ----------
   function boot() {
     UsersTable.init();
     ExportModal.init();
     bindForms();
   }
 
-  // Metronic style lifecycle
   if (typeof KTUtil !== "undefined" && typeof KTUtil.onDOMContentLoaded === "function") {
     KTUtil.onDOMContentLoaded(boot);
   } else {
