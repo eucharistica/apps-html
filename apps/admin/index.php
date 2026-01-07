@@ -27,6 +27,7 @@ if (!isset($registry[$page])) {
 }
 
 $route = $registry[$page];
+$GLOBALS['EMR_PAGE_ASSETS'] = $route['assets'] ?? ['css' => [], 'js' => []];
 $permission = $route['permission'] ?? null;
 if ($permission) {
     emr_require_permission($permission);

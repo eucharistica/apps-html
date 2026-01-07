@@ -5,12 +5,30 @@ return [
     'users' => [
         'title' => 'Users',
         'permission' => 'admin.users.view',
-        'file' => './pages/users/list.php',  // Path relative dari index.php
+        'file' => './pages/users/list.php',
+        'assets' => [
+            'css' => [
+            ],
+            'js' => [
+                '/../apps/admin/pages/users/users.js',
+            ],
+        ],
     ],
     'roles' => [
         'title' => 'Roles',
         'permission' => 'admin.roles.view',
         'file' => './pages/roles/list.php',
+        'assets' => [
+            'css' => [
+                'plugins/custom/datatables/datatables.bundle.css',
+            ],
+            'js' => [
+                'plugins/custom/datatables/datatables.bundle.js',
+                'js/custom/apps/user-management/users/list/table.js',
+                'js/custom/apps/user-management/users/list/export-users.js',
+                'js/custom/utilities/modals/users-search.js',
+            ],
+        ],
     ],
     'permissions' => [
         'title' => 'Permissions',

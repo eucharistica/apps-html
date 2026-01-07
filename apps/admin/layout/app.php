@@ -18,10 +18,6 @@ $asset = $asset ?? (defined('EMR_BASE_URL') ? EMR_BASE_URL . 'assets/' : '/asset
 
     <link rel="shortcut icon" href="<?= $asset ?>media/logos/favicon.ico" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
-
-    <!-- CSS User List -->
-    <link href="<?= $asset ?>plugins/custom/datatables/datatables.bundle.css" rel="stylesheet" type="text/css" />
-
     <link href="<?= $asset ?>plugins/custom/fullcalendar/fullcalendar.bundle.css" rel="stylesheet" type="text/css" />
     <link href="<?= $asset ?>plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
     <link href="<?= $asset ?>css/style.bundle.css" rel="stylesheet" type="text/css" />
@@ -36,6 +32,15 @@ $asset = $asset ?? (defined('EMR_BASE_URL') ? EMR_BASE_URL . 'assets/' : '/asset
             }
         })();
     </script>
+
+    
+    <?php
+    $pageAssets = $GLOBALS['EMR_PAGE_ASSETS'] ?? ['css' => [], 'js' => []];
+    ?>
+
+    <?php foreach (($pageAssets['css'] ?? []) as $css): ?>
+    <link href="<?= htmlspecialchars($asset . ltrim($css, '/')) ?>" rel="stylesheet" type="text/css" />
+    <?php endforeach; ?>
 </head>
 
 <body id="kt_app_body"
@@ -131,11 +136,8 @@ $GLOBALS['EMR_ADMIN_MENU'] = $__admin_menu;
 <script src="<?= $asset ?>plugins/global/plugins.bundle.js"></script>
 <script src="<?= $asset ?>js/scripts.bundle.js"></script>
 
-<!--begin:: Javascript User List(used for this page only)-->
-<script src="<?= $asset ?>plugins/custom/datatables/datatables.bundle.js"></script>
-<script src="<?= $asset ?>js/custom/apps/user-management/users/list/table.js"></script>
-<script src="<?= $asset ?>assets/js/custom/apps/user-management/users/list/export-users.js"></script>   
-<script src="<?= $asset ?>assets/js/custom/utilities/modals/users-search.js"></script>
-<!--end:: Javascript-->
+<?php foreach (($pageAssets['js'] ?? []) as $js): ?>
+  <script src="<?= htmlspecialchars($asset . ltrim($js, '/')) ?>"></script>
+<?php endforeach; ?>
 </body>
 </html>
