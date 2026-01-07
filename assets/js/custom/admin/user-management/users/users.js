@@ -1,31 +1,74 @@
 "use strict";
 
 (function () {
+  // --------- tiny helpers ----------
   const qs = (sel, root = document) => root.querySelector(sel);
 
-  function emrUrl(path) {
-    return `${window.EMR?.baseUrl || "/"}${path}`;
-  }
+  const baseUrl = () => window.EMR?.baseUrl || "/";
+  const csrfToken = () => qs("#csrf_token")?.value || "";
 
-  function getCsrf() {
-    return qs("#csrf_token")?.value || "";
-  }
-
-  function disableSubmit(form, loading = true, labelIdle = "Save Changes") {
+  const disableSubmit = (form, loading = true, labelIdle = "Save Changes") => {
     const btn = form?.querySelector('button[type="submit"]');
     if (!btn) return;
     btn.disabled = loading;
     btn.innerText = loading ? "Processing..." : labelIdle;
-  }
+  };
 
+  const swalError = (title, text) =>
+    Swal.fire({
+      icon: "error",
+      title,
+      text,
+      buttonsStyling: false,
+      confirmButtonText: "OK",
+      customClass: { confirmButton: "btn btn-primary" },
+    });
+
+  const swalSuccess = (title, text) =>
+    Swal.fire({
+      icon: "success",
+      title,
+      text,
+      buttonsStyling: false,
+      confirmButtonText: "OK",
+      customClass: { confirmButton: "btn btn-primary" },
+    });
+
+  // --------- DataTable + Filters + Export ----------
   const UsersTable = (function () {
     let dt = null;
     let tableEl = null;
 
+    const SEL = {
+      table: "#kt_table_users",
+      search: '[data-kt-user-table-filter="search"]',
+      filterForm: '[data-kt-user-table-filter="form"]',
+      filterApply: '[data-kt-user-table-filter="filter"]',
+      filterReset: '[data-kt-user-table-filter="reset"]',
+      filterRole: '[data-kt-user-table-filter="role"]',
+
+      exportModal: "#kt_modal_export_users",
+      exportForm: "#kt_modal_export_users_form",
+      exportSubmit: '[data-kt-users-modal-action="submit"]',
+      exportCancel: '[data-kt-users-modal-action="cancel"]',
+      exportClose: '[data-kt-users-modal-action="close"]',
+      exportFormat: '[name="format"]',
+    };
+
+    // Name(0), Username(1), Roles(2), Status(3), Last login(4), Actions(5)
+    const COL = { ROLES: 2, ACTIONS: 5 };
+
+    const canDT = () => typeof $ !== "undefined" && $.fn && $.fn.DataTable;
+
     function initDataTable() {
-      tableEl = document.getElementById("kt_table_users");
-      if (!tableEl) return;
-      if (typeof $ === "undefined" || !$.fn?.DataTable) return;
+      tableEl = qs(SEL.table);
+      if (!tableEl || !canDT()) return;
+
+      // guard: cegah "Cannot reinitialise DataTable" [web:107]
+      if ($.fn.DataTable.isDataTable(tableEl)) {
+        dt = $(tableEl).DataTable();
+        return;
+      }
 
       dt = $(tableEl).DataTable({
         info: false,
@@ -33,7 +76,9 @@
         pageLength: 10,
         lengthChange: false,
 
-        dom: "<'row'<'col-12'B>>rt<'row'<'col-12'p>>",
+        // penting: jangan set dom/layout, biar paging & responsif tetap native
+        columnDefs: [{ orderable: false, targets: COL.ACTIONS }],
+
         buttons: [
           { extend: "copyHtml5", title: "Users" },
           { extend: "csvHtml5", title: "Users" },
@@ -41,36 +86,46 @@
           { extend: "pdfHtml5", title: "Users" },
           { extend: "print", title: "Users" },
         ],
-
-        columnDefs: [
-          { orderable: false, targets: 5 }, // Actions
-        ],
       });
 
-      $(dt.buttons().container()).addClass("d-none");
+      // hide button container (export via modal trigger)
+      try {
+        $(dt.buttons().container()).addClass("d-none");
+      } catch (e) {}
     }
 
     function bindSearch() {
-      const input = qs('[data-kt-user-table-filter="search"]');
+      const input = qs(SEL.search);
       if (!input || !dt) return;
 
+      let timer = null;
       input.addEventListener("keyup", (e) => {
-        dt.search(e.target.value).draw();
+        clearTimeout(timer);
+        const val = e.target.value;
+        timer = setTimeout(() => dt.search(val).draw(), 150);
       });
     }
 
-    // Filter role -> column Roles index 2
     function bindFilterRole() {
-      const form = qs('[data-kt-user-table-filter="form"]');
-      const btnApply = qs('[data-kt-user-table-filter="filter"]', form || document);
-      const btnReset = qs('[data-kt-user-table-filter="reset"]');
-      const roleSelect = qs('[data-kt-user-table-filter="role"]', form || document);
+      const form = qs(SEL.filterForm);
+      const btnApply = form ? qs(SEL.filterApply, form) : null;
+      const btnReset = form ? qs(SEL.filterReset, form) : qs(SEL.filterReset);
+      const roleSelect = form ? qs(SEL.filterRole, form) : qs(SEL.filterRole);
 
       if (!dt || !roleSelect) return;
 
       if (btnApply) {
         btnApply.addEventListener("click", () => {
-          dt.column(2).search(roleSelect.value || "").draw();
+          const role = roleSelect.value || "";
+
+          // exact match supaya "Admin" tidak match "Super Admin" [web:106]
+          if (!role) {
+            dt.column(COL.ROLES).search("").draw();
+            return;
+          }
+
+          const safe = $.fn.dataTable.util.escapeRegex(role);
+          dt.column(COL.ROLES).search(`^${safe}$`, true, false).draw();
         });
       }
 
@@ -79,18 +134,61 @@
           if (typeof $ !== "undefined") $(roleSelect).val("").trigger("change");
           else roleSelect.value = "";
 
-          dt.column(2).search("").draw();
+          dt.column(COL.ROLES).search("");
           dt.search("").draw();
         });
       }
     }
 
     function exportByFormat(format) {
-      if (!dt) return;
+      if (!dt) return false;
       const map = { copy: 0, csv: 1, excel: 2, pdf: 3, print: 4 };
       const idx = map[format];
-      if (typeof idx === "undefined") return;
+      if (typeof idx === "undefined") return false;
+
       dt.button(idx).trigger();
+      return true;
+    }
+
+    function bindExportModal() {
+      const modalEl = qs(SEL.exportModal);
+      if (!modalEl || !dt) return;
+
+      const form = qs(SEL.exportForm, modalEl);
+      const btnSubmit = qs(SEL.exportSubmit, modalEl);
+      const btnCancel = qs(SEL.exportCancel, modalEl);
+      const btnClose = qs(SEL.exportClose, modalEl);
+
+      if (!btnSubmit) return;
+
+      const modal = new bootstrap.Modal(modalEl);
+      const close = () => modal.hide();
+
+      btnSubmit.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const format = form?.querySelector(SEL.exportFormat)?.value || "";
+        if (!format) {
+          swalError("Format wajib dipilih", "Pilih salah satu format export (Excel / PDF / CSV / Print).");
+          return;
+        }
+
+        const ok = exportByFormat(format);
+        if (!ok) {
+          swalError("Export gagal", "Format tidak didukung atau Buttons belum ter-load.");
+          return;
+        }
+
+        close();
+      });
+
+      const askClose = (e) => {
+        e?.preventDefault?.();
+        close();
+      };
+
+      if (btnCancel) btnCancel.addEventListener("click", askClose);
+      if (btnClose) btnClose.addEventListener("click", askClose);
     }
 
     return {
@@ -98,92 +196,25 @@
         initDataTable();
         bindSearch();
         bindFilterRole();
+        bindExportModal();
       },
-      exportByFormat,
     };
   })();
 
-  const ExportModal = (function () {
-    function init() {
-      const modalEl = document.getElementById("kt_modal_export_users");
-      if (!modalEl) return;
-
-      const form = modalEl.querySelector("#kt_modal_export_users_form");
-      const btnSubmit = modalEl.querySelector('[data-kt-users-modal-action="submit"]');
-      const btnCancel = modalEl.querySelector('[data-kt-users-modal-action="cancel"]');
-      const btnClose = modalEl.querySelector('[data-kt-users-modal-action="close"]');
-
-      const modal = new bootstrap.Modal(modalEl);
-
-      function closeModal() {
-        modal.hide();
-      }
-
-      function getFormat() {
-        return form?.querySelector('[name="format"]')?.value || "";
-      }
-
-      if (btnSubmit) {
-        btnSubmit.addEventListener("click", (e) => {
-          e.preventDefault();
-
-          const format = getFormat();
-          if (!format) {
-            Swal.fire({
-              icon: "error",
-              title: "Format wajib dipilih",
-              text: "Pilih salah satu format export (Excel / PDF / CSV / Print).",
-              buttonsStyling: false,
-              confirmButtonText: "OK",
-              customClass: { confirmButton: "btn btn-primary" },
-            });
-            return;
-          }
-
-          UsersTable.exportByFormat(format);
-          closeModal();
-        });
-      }
-
-      const askCancel = (e) => {
-        e?.preventDefault?.();
-        Swal.fire({
-          text: "Tutup modal export?",
-          icon: "warning",
-          showCancelButton: true,
-          buttonsStyling: false,
-          confirmButtonText: "Ya",
-          cancelButtonText: "Tidak",
-          customClass: {
-            confirmButton: "btn btn-primary",
-            cancelButton: "btn btn-active-light",
-          },
-        }).then((r) => {
-          if (r.isConfirmed) {
-            form?.reset?.();
-            closeModal();
-          }
-        });
-      };
-
-      if (btnCancel) btnCancel.addEventListener("click", askCancel);
-      if (btnClose) btnClose.addEventListener("click", askCancel);
-    }
-
-    return { init };
-  })();
-
+  // --------- CRUD handlers ----------
   async function editUser(userId) {
     try {
-      const res = await fetch(emrUrl(`apps/admin/pages/users/api/get-users.php?id=${encodeURIComponent(userId)}`));
+      const url = `${baseUrl()}apps/admin/pages/users/api/get-users.php?id=${encodeURIComponent(userId)}`;
+      const res = await fetch(url);
       const json = await res.json();
+
       if (!json.success) {
-        Swal.fire({ icon: "error", title: "Error", text: json.message || "Gagal ambil data user" });
+        swalError("Error", json.message || "Gagal ambil data user");
         return;
       }
 
       const user = json.data || {};
-      const form = document.getElementById("editUserForm");
+      const form = qs("#editUserForm");
       if (!form) return;
 
       form.querySelector('[name="user_id"]').value = user.id ?? "";
@@ -193,15 +224,15 @@
       form.querySelector('[name="status"]').value = user.status ?? "active";
       form.querySelector('[name="role_id"]').value = user.role_id ?? "";
 
-      new bootstrap.Modal(document.getElementById("editUserModal")).show();
+      new bootstrap.Modal(qs("#editUserModal")).show();
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Error", text: "Terjadi kesalahan ambil data user" });
+      swalError("Error", "Terjadi kesalahan ambil data user");
     }
   }
 
   function deleteUser(userId) {
-    const csrf = getCsrf();
+    const csrf = csrfToken();
 
     Swal.fire({
       icon: "warning",
@@ -211,10 +242,7 @@
       buttonsStyling: false,
       confirmButtonText: "Ya, hapus",
       cancelButtonText: "Batal",
-      customClass: {
-        confirmButton: "btn btn-danger",
-        cancelButton: "btn btn-secondary",
-      },
+      customClass: { confirmButton: "btn btn-danger", cancelButton: "btn btn-secondary" },
     }).then(async (result) => {
       if (!result.isConfirmed) return;
 
@@ -227,7 +255,7 @@
       });
 
       try {
-        const r = await fetch(emrUrl("apps/admin/pages/users/api/delete-user.php"), {
+        const r = await fetch(`${baseUrl()}apps/admin/pages/users/api/delete-user.php`, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: `user_id=${encodeURIComponent(userId)}&_csrf=${encodeURIComponent(csrf)}`,
@@ -235,35 +263,14 @@
 
         const data = await r.json();
         if (data.success) {
-          await Swal.fire({
-            icon: "success",
-            title: "Berhasil!",
-            text: data.message || "User berhasil dihapus",
-            buttonsStyling: false,
-            confirmButtonText: "OK",
-            customClass: { confirmButton: "btn btn-primary" },
-          });
+          await swalSuccess("Berhasil!", data.message || "User berhasil dihapus");
           location.reload();
         } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error!",
-            text: data.message || "Gagal menghapus user",
-            buttonsStyling: false,
-            confirmButtonText: "OK",
-            customClass: { confirmButton: "btn btn-primary" },
-          });
+          swalError("Error!", data.message || "Gagal menghapus user");
         }
       } catch (err) {
         console.error(err);
-        Swal.fire({
-          icon: "error",
-          title: "Error!",
-          text: "Terjadi kesalahan saat menghapus user",
-          buttonsStyling: false,
-          confirmButtonText: "OK",
-          customClass: { confirmButton: "btn btn-primary" },
-        });
+        swalError("Error!", "Terjadi kesalahan saat menghapus user");
       }
     });
   }
@@ -276,16 +283,16 @@
 
     const userId = btn.dataset.userId;
     const action = btn.dataset.action;
-
     if (!userId) return;
 
     if (action === "edit") editUser(userId);
     if (action === "delete") deleteUser(userId);
   });
 
+  // --------- Forms: create / update ----------
   function bindForms() {
-    const addForm = document.getElementById("addUserForm");
-    const editForm = document.getElementById("editUserForm");
+    const addForm = qs("#addUserForm");
+    const editForm = qs("#editUserForm");
 
     if (addForm) {
       addForm.addEventListener("submit", async (e) => {
@@ -294,45 +301,24 @@
 
         try {
           const fd = new FormData(addForm);
-          const csrf = getCsrf();
+          const csrf = csrfToken();
           if (csrf) fd.append("_csrf", csrf);
 
-          const r = await fetch(emrUrl("apps/admin/pages/users/api/create-user.php"), {
+          const r = await fetch(`${baseUrl()}apps/admin/pages/users/api/create-user.php`, {
             method: "POST",
             body: new URLSearchParams(fd),
           });
 
           const data = await r.json();
           if (data.success) {
-            await Swal.fire({
-              icon: "success",
-              title: "Berhasil!",
-              text: data.message || "User berhasil dibuat",
-              buttonsStyling: false,
-              confirmButtonText: "OK",
-              customClass: { confirmButton: "btn btn-primary" },
-            });
+            await swalSuccess("Berhasil!", data.message || "User berhasil dibuat");
             location.reload();
           } else {
-            Swal.fire({
-              icon: "error",
-              title: "Error!",
-              text: data.message || "Gagal membuat user",
-              buttonsStyling: false,
-              confirmButtonText: "OK",
-              customClass: { confirmButton: "btn btn-primary" },
-            });
+            swalError("Error!", data.message || "Gagal membuat user");
           }
         } catch (err) {
           console.error(err);
-          Swal.fire({
-            icon: "error",
-            title: "Error!",
-            text: "Terjadi kesalahan saat membuat user",
-            buttonsStyling: false,
-            confirmButtonText: "OK",
-            customClass: { confirmButton: "btn btn-primary" },
-          });
+          swalError("Error!", "Terjadi kesalahan saat membuat user");
         } finally {
           disableSubmit(addForm, false, "Create User");
         }
@@ -346,45 +332,24 @@
 
         try {
           const fd = new FormData(editForm);
-          const csrf = getCsrf();
+          const csrf = csrfToken();
           if (csrf) fd.append("_csrf", csrf);
 
-          const r = await fetch(emrUrl("apps/admin/pages/users/api/update-user.php"), {
+          const r = await fetch(`${baseUrl()}apps/admin/pages/users/api/update-user.php`, {
             method: "POST",
             body: new URLSearchParams(fd),
           });
 
           const data = await r.json();
           if (data.success) {
-            await Swal.fire({
-              icon: "success",
-              title: "Berhasil!",
-              text: data.message || "Update user berhasil",
-              buttonsStyling: false,
-              confirmButtonText: "OK",
-              customClass: { confirmButton: "btn btn-primary" },
-            });
+            await swalSuccess("Berhasil!", data.message || "Update user berhasil");
             location.reload();
           } else {
-            Swal.fire({
-              icon: "error",
-              title: "Error!",
-              text: data.message || "Gagal update user",
-              buttonsStyling: false,
-              confirmButtonText: "OK",
-              customClass: { confirmButton: "btn btn-primary" },
-            });
+            swalError("Error!", data.message || "Gagal update user");
           }
         } catch (err) {
           console.error(err);
-          Swal.fire({
-            icon: "error",
-            title: "Error!",
-            text: "Terjadi kesalahan saat update user",
-            buttonsStyling: false,
-            confirmButtonText: "OK",
-            customClass: { confirmButton: "btn btn-primary" },
-          });
+          swalError("Error!", "Terjadi kesalahan saat update user");
         } finally {
           disableSubmit(editForm, false, "Save Changes");
         }
@@ -394,7 +359,6 @@
 
   function boot() {
     UsersTable.init();
-    ExportModal.init();
     bindForms();
   }
 

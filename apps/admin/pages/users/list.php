@@ -275,9 +275,9 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
                     <th class="min-w-200px">Name</th>
                     <th class="min-w-125px">Username</th>
-                    <th class="min-w-150px">Roles</th>
-                    <th class="min-w-125px">Status</th>
-                    <th class="min-w-150px">Last login</th>
+                    <th class="min-w-100px">Roles</th>
+                    <th class="min-w-100px">Status</th>
+                    <th class="min-w-100px">Last login</th>
                     <th class="text-end min-w-100px">Actions</th>
                 </tr>
             </thead>
@@ -308,18 +308,20 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </div>
 
                             <div class="d-flex flex-column">
-                                <span class="text-gray-800 mb-1"><?= htmlspecialchars($displayName) ?></span>
+                                <span class="text-gray-800 text-hover-primary mb-1"><?= htmlspecialchars($displayName) ?></span>
                                 <span class="text-muted"><?= htmlspecialchars($email) ?></span>
                             </div>
                         </td>
 
-                        <td><?= htmlspecialchars($user['username'] ?? '-') ?></td>
+                        <td>
+                            <span class="text-muted"><?= htmlspecialchars($user['username'] ?? '-') ?></span>
+                        </td>
 
                         <td>
                             <?php if (!empty($user['roles'])): ?>
                                 <span class="badge badge-light-primary"><?= htmlspecialchars($user['roles']) ?></span>
                             <?php else: ?>
-                                <span class="text-muted">No roles</span>
+                                <span class="badge badge-light fw-bold">No roles</span>
                             <?php endif; ?>
                         </td>
 
@@ -331,7 +333,7 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                         <!-- Last login (human readable + sortable) -->
                         <td data-order="<?= (int) $lastLoginTs ?>">
-                            <span class="text-muted"><?= htmlspecialchars($lastLoginText) ?></span>
+                            <span class="badge badge-light fw-bold"><?= htmlspecialchars($lastLoginText) ?></span>
                         </td>
 
                         <td class="text-end">

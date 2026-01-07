@@ -35,6 +35,15 @@ return [
         'title' => 'Permissions',
         'permission' => 'admin.permissions.view',
         'file' => './pages/permissions/list.php',
+        'assets' => [
+            'css' => [
+                'plugins/custom/datatables/datatables.bundle.css',
+            ],
+            'js' => [
+                'js/custom/admin/user-management/permissions/permissions.js',
+                'plugins/custom/datatables/datatables.bundle.js',
+            ],
+        ],
     ],
 ];
 
