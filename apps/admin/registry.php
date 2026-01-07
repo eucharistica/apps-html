@@ -8,9 +8,13 @@ return [
         'file' => './pages/users/list.php',
         'assets' => [
             'css' => [
+                'plugins/custom/datatables/datatables.bundle.css',
             ],
             'js' => [
                 '/../apps/admin/pages/users/users.js',
+                'plugins/custom/datatables/datatables.bundle.js',
+                'js/custom/apps/user-management/users/list/table.js',
+                'js/custom/apps/user-management/users/list/export-users.js',
             ],
         ],
     ],
@@ -26,7 +30,6 @@ return [
                 'plugins/custom/datatables/datatables.bundle.js',
                 'js/custom/apps/user-management/users/list/table.js',
                 'js/custom/apps/user-management/users/list/export-users.js',
-                'js/custom/utilities/modals/users-search.js',
             ],
         ],
     ],

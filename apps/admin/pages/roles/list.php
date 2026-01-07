@@ -1395,5 +1395,5 @@
                                             <!--end::Table-->
                                         </div>
                                         <!--end::Card body-->
-                                    </div>
+</div>
                                     
