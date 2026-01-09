@@ -7,6 +7,20 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 
 $root = $root ?? (defined('EMR_ROOT') ? EMR_ROOT : realpath(__DIR__ . '/../../..'));
 $asset = $asset ?? (defined('EMR_BASE_URL') ? EMR_BASE_URL . 'assets/' : '/assets/');
+
+// cache-busting untuk assets dari registry (css/js)
+function emr_asset_url(string $assetBaseUrl, string $relPath, string $rootDir): string
+{
+    $relPath = ltrim($relPath, '/');
+    $pathOnly = $relPath;
+    $qsPos = strpos($pathOnly, '?');
+    if ($qsPos !== false)
+        $pathOnly = substr($pathOnly, 0, $qsPos);
+    $full = rtrim($rootDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $pathOnly);
+    $v = file_exists($full) ? filemtime($full) : time();
+    return rtrim($assetBaseUrl, '/') . '/' . $pathOnly . '?v=' . $v;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -39,8 +53,9 @@ $asset = $asset ?? (defined('EMR_BASE_URL') ? EMR_BASE_URL . 'assets/' : '/asset
     ?>
 
     <?php foreach (($pageAssets['css'] ?? []) as $css): ?>
-    <link href="<?= htmlspecialchars($asset . ltrim($css, '/')) ?>" rel="stylesheet" type="text/css" />
+            <link href="<?= htmlspecialchars(emr_asset_url($asset, $css, $root)) ?>" rel="stylesheet" type="text/css" />
     <?php endforeach; ?>
+
 </head>
 
 <body id="kt_app_body"
@@ -86,14 +101,14 @@ $GLOBALS['EMR_ADMIN_MENU'] = $__admin_menu;
                 <div class="app-container container-xxl d-flex align-items-center">
                     <ul class="nav nav-tabs nav-line-tabs nav-line-tabs-2x border-0 fs-6 fw-semibold" role="tablist">
                         <?php foreach ($__admin_menu as $item): ?>
-                                <?php $isActive = ($_GET['page'] ?? 'users') === $item['key']; ?>
-                                <li class="nav-item" role="presentation">
-                                    <a href="<?= htmlspecialchars($item['url']) ?>" 
-                                       class="nav-link <?= $isActive ? 'active' : '' ?>" 
-                                       role="tab">
-                                        <?= htmlspecialchars($item['title']) ?>
-                                    </a>
-                                </li>
+                                        <?php $isActive = ($_GET['page'] ?? 'users') === $item['key']; ?>
+                                        <li class="nav-item" role="presentation">
+                                            <a href="<?= htmlspecialchars($item['url']) ?>" 
+                                               class="nav-link <?= $isActive ? 'active' : '' ?>" 
+                                               role="tab">
+                                                <?= htmlspecialchars($item['title']) ?>
+                                            </a>
+                                        </li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
@@ -137,7 +152,8 @@ $GLOBALS['EMR_ADMIN_MENU'] = $__admin_menu;
 <script src="<?= $asset ?>js/scripts.bundle.js"></script>
 
 <?php foreach (($pageAssets['js'] ?? []) as $js): ?>
-  <script src="<?= htmlspecialchars($asset . ltrim($js, '/')) ?>"></script>
+      <script src="<?= htmlspecialchars(emr_asset_url($asset, $js, $root)) ?>"></script>
 <?php endforeach; ?>
+
 </body>
 </html>

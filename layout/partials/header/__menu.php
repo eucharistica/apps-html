@@ -27,14 +27,16 @@ $__emr_root = defined('EMR_ROOT') ? EMR_ROOT : realpath(__DIR__ . '/../../../');
 			<!--end:Menu item-->
 
 			<!--begin:Menu item-->
-			<div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start"
+			<!-- <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start"
 				data-kt-menu-offset="-400,0" class="menu-item menu-lg-down-accordion me-0 me-lg-2">
 				<span class="menu-link"><span class="menu-icon"><i class="ki-outline ki-notepad-bookmark fs-3"></i></span><span
 						class="menu-title">Pages</span><span class="menu-arrow d-lg-none"></span></span>
 				<div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0">
-					<?php include $__emr_root . '/layout/partials/header/_menu/__pages.php'; ?>
+					<?php 
+					// include $__emr_root . '/layout/partials/header/_menu/__pages.php'; 
+					?>
 				</div>
-			</div>
+			</div> -->
 			<!--end:Menu item-->
 
 			<!-- Remaining menu is kept as-is for now -->

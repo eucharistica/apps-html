@@ -2,6 +2,15 @@
 // apps/home/registry.php
 
 return [
+    'admin' => [
+        'title' => 'Admin',
+        'subtitle' => 'Kelola user, role, permission',
+        'icon' => 'ki-outline ki-setting-2',
+        'url' => 'apps/admin/index.php',
+        'permission' => 'admin.access',
+        'order' => 5,
+    ],
+
     'simrs' => [
         'title' => 'SIMRS',
         'subtitle' => 'Pelayanan klinis',
@@ -10,6 +19,7 @@ return [
         'permission' => 'simrs.dashboard.view',
         'order' => 10,
     ],
+
     'ekinerja' => [
         'title' => 'eKinerja',
         'subtitle' => 'Kinerja pegawai',
@@ -18,6 +28,7 @@ return [
         'permission' => null,
         'order' => 20,
     ],
+
     'pengadaan' => [
         'title' => 'Pengadaan',
         'subtitle' => 'Barang & jasa',
@@ -26,13 +37,4 @@ return [
         'permission' => null,
         'order' => 30,
     ],
-    'admin' => [
-        'title' => 'Admin',
-        'subtitle' => 'Kelola user, role, permission',
-        'icon' => 'ki-outline ki-setting-2',
-        'url' => 'apps/admin/index.php',
-        'permission' => 'admin.access', // wajib admin
-        'order' => 5,
-    ],
-
 ];

@@ -1,9 +1,5 @@
 <?php
 // apps/simrs/layout/app.php
-// Variables expected:
-// - $root, $asset
-// - $emr_tabs (array)
-// - $emr_content (absolute file path)
 
 ?><!DOCTYPE html>
 <html lang="en">

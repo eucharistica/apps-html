@@ -19,10 +19,16 @@ CREATE TABLE IF NOT EXISTS `emr_role_has_permissions`  (
 CREATE TABLE IF NOT EXISTS `emr_roles`  (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'app',
+  `scope_key` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `is_primary` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` datetime NULL DEFAULT NULL,
   `updated_at` datetime NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uq_emr_roles_name`(`name` ASC) USING BTREE
+  UNIQUE INDEX `uq_emr_roles_name`(`name` ASC) USING BTREE,
+  INDEX `idx_emr_roles_type`(`type` ASC) USING BTREE,
+  INDEX `idx_emr_roles_scope_key`(`scope_key` ASC) USING BTREE,
+  INDEX `idx_emr_roles_is_primary`(`is_primary` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------

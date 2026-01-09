@@ -34,6 +34,24 @@
       customClass: { confirmButton: "btn btn-primary" },
     });
 
+  // --------- select2 helpers ----------
+  function setSelect2Values(selectEl, values) {
+    if (!selectEl) return;
+
+    const arr = Array.isArray(values) ? values.map(String) : [];
+    if (typeof $ !== "undefined" && $.fn && $.fn.select2 && $(selectEl).hasClass("select2-hidden-accessible")) {
+      $(selectEl).val(arr).trigger("change"); // select2 listens to change [web:360]
+      return;
+    }
+    // fallback native
+    const set = new Set(arr);
+    Array.from(selectEl.options).forEach((opt) => (opt.selected = set.has(String(opt.value))));
+  }
+
+  function clearSelect2(selectEl) {
+    setSelect2Values(selectEl, []);
+  }
+
   // --------- DataTable + Filters + Export ----------
   const UsersTable = (function () {
     let dt = null;
@@ -64,7 +82,6 @@
       tableEl = qs(SEL.table);
       if (!tableEl || !canDT()) return;
 
-      // guard: cegah "Cannot reinitialise DataTable" [web:107]
       if ($.fn.DataTable.isDataTable(tableEl)) {
         dt = $(tableEl).DataTable();
         return;
@@ -75,22 +92,12 @@
         order: [],
         pageLength: 10,
         lengthChange: false,
-
-        // penting: jangan set dom/layout, biar paging & responsif tetap native
         columnDefs: [{ orderable: false, targets: COL.ACTIONS }],
-
-        buttons: [
-          { extend: "copyHtml5", title: "Users" },
-          { extend: "csvHtml5", title: "Users" },
-          { extend: "excelHtml5", title: "Users" },
-          { extend: "pdfHtml5", title: "Users" },
-          { extend: "print", title: "Users" },
-        ],
       });
 
       // hide button container (export via modal trigger)
       try {
-        $(dt.buttons().container()).addClass("d-none");
+        $(dt.buttons?.().container?.()).addClass("d-none");
       } catch (e) {}
     }
 
@@ -114,18 +121,29 @@
 
       if (!dt || !roleSelect) return;
 
+      // Custom filter supaya tetap work walau Roles jadi banyak badge
+      // Logic: kalau role dipilih, cek apakah text kolom roles mengandung role tsb
+      $.fn.dataTable.ext.search.push(function (settings, data, dataIndex, rowData, counter) {
+        if (!tableEl || settings.nTable !== tableEl) return true;
+
+        const role = roleSelect.value || "";
+        if (!role) return true;
+
+        const row = dt.row(dataIndex).node();
+        if (!row) return true;
+
+        const cell = row.querySelectorAll("td")[COL.ROLES];
+        const txt = (cell?.textContent || "").trim();
+
+        // match exact role name as token
+        // karena output badge bisa "AdminUser", pakai batas koma / newline / space multiple
+        // minimal: contains role string
+        return txt.includes(role);
+      });
+
       if (btnApply) {
         btnApply.addEventListener("click", () => {
-          const role = roleSelect.value || "";
-
-          // exact match supaya "Admin" tidak match "Super Admin" [web:106]
-          if (!role) {
-            dt.column(COL.ROLES).search("").draw();
-            return;
-          }
-
-          const safe = $.fn.dataTable.util.escapeRegex(role);
-          dt.column(COL.ROLES).search(`^${safe}$`, true, false).draw();
+          dt.draw();
         });
       }
 
@@ -134,18 +152,16 @@
           if (typeof $ !== "undefined") $(roleSelect).val("").trigger("change");
           else roleSelect.value = "";
 
-          dt.column(COL.ROLES).search("");
           dt.search("").draw();
         });
       }
     }
 
     function exportByFormat(format) {
-      if (!dt) return false;
+      if (!dt || !dt.button) return false;
       const map = { copy: 0, csv: 1, excel: 2, pdf: 3, print: 4 };
       const idx = map[format];
       if (typeof idx === "undefined") return false;
-
       dt.button(idx).trigger();
       return true;
     }
@@ -222,7 +238,11 @@
       form.querySelector('[name="username"]').value = user.username ?? "";
       form.querySelector('[name="email"]').value = user.email ?? "";
       form.querySelector('[name="status"]').value = user.status ?? "active";
-      form.querySelector('[name="role_id"]').value = user.role_id ?? "";
+
+      // NEW: multi role
+      const rolesSelect = qs("#edit_roles") || form.querySelector('[name="role_ids[]"]');
+      clearSelect2(rolesSelect);
+      setSelect2Values(rolesSelect, user.role_ids || []); // array -> select2 [web:360]
 
       new bootstrap.Modal(qs("#editUserModal")).show();
     } catch (err) {

@@ -88,7 +88,7 @@ $stmt = $pdo->query("
         u.status,
         u.profile_photo_path,
         u.last_login_at,
-        GROUP_CONCAT(r.name SEPARATOR ', ') AS roles
+        GROUP_CONCAT(r.name ORDER BY r.name SEPARATOR '||') AS roles
     FROM emr_users u
     LEFT JOIN emr_user_has_roles ur ON ur.user_id = u.id
     LEFT JOIN emr_roles r ON r.id = ur.role_id
@@ -148,9 +148,9 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             >
                                 <option></option>
                                 <?php foreach ($roles as $role): ?>
-                                    <option value="<?= htmlspecialchars($role['name']) ?>">
-                                        <?= htmlspecialchars($role['name']) ?>
-                                    </option>
+                                        <option value="<?= htmlspecialchars($role['name']) ?>">
+                                            <?= htmlspecialchars($role['name']) ?>
+                                        </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -188,14 +188,14 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 <!-- Add user -->
                 <?php if (emr_can('admin.users.create')): ?>
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#addUserModal"
-                    >
-                        <i class="ki-outline ki-plus fs-2"></i> Add User
-                    </button>
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#addUserModal"
+                        >
+                            <i class="ki-outline ki-plus fs-2"></i> Add User
+                        </button>
                 <?php endif; ?>
             </div>
         </div>
@@ -225,9 +225,9 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             >
                                 <option></option>
                                 <?php foreach ($roles as $role): ?>
-                                    <option value="<?= htmlspecialchars($role['name']) ?>">
-                                        <?= htmlspecialchars($role['name']) ?>
-                                    </option>
+                                        <option value="<?= htmlspecialchars($role['name']) ?>">
+                                            <?= htmlspecialchars($role['name']) ?>
+                                        </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -284,7 +284,7 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             <tbody>
                 <?php foreach ($users as $user): ?>
-                    <?php
+                        <?php
                         $avatarUrl = emr_user_avatar_url($user['profile_photo_path'] ?? null);
                         $displayName = $user['name'] ?: ($user['username'] ?? '-');
                         $email = $user['email'] ?? '-';
@@ -292,88 +292,95 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         $lastLogin = $user['last_login_at'] ?? null;
                         $lastLoginTs = $lastLogin ? strtotime($lastLogin) : 0; // timestamp untuk data-order [web:64]
                         $lastLoginText = emr_time_ago($lastLogin);
-                    ?>
-                    <tr>
-                        <!-- Name + avatar + email -->
-                        <td class="d-flex align-items-center">
-                            <div class="symbol symbol-circle symbol-50px overflow-hidden me-3">
-                                <div class="symbol-label">
-                                    <img
-                                        src="<?= htmlspecialchars($avatarUrl) ?>"
-                                        alt="<?= htmlspecialchars($displayName) ?>"
-                                        class="w-100"
-                                        onerror="this.onerror=null;this.src='<?= htmlspecialchars(EMR_BASE_URL . 'assets/media/avatars/blank.png') ?>';"
-                                    />
+                        ?>
+                        <tr>
+                            <!-- Name + avatar + email -->
+                            <td class="d-flex align-items-center">
+                                <div class="symbol symbol-circle symbol-50px overflow-hidden me-3">
+                                    <div class="symbol-label">
+                                        <img
+                                            src="<?= htmlspecialchars($avatarUrl) ?>"
+                                            alt="<?= htmlspecialchars($displayName) ?>"
+                                            class="w-100"
+                                            onerror="this.onerror=null;this.src='<?= htmlspecialchars(EMR_BASE_URL . 'assets/media/avatars/blank.png') ?>';"
+                                        />
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="d-flex flex-column">
-                                <span class="text-gray-800 text-hover-primary mb-1"><?= htmlspecialchars($displayName) ?></span>
-                                <span class="text-muted"><?= htmlspecialchars($email) ?></span>
-                            </div>
-                        </td>
+                                <div class="d-flex flex-column">
+                                    <span class="text-gray-800 text-hover-primary mb-1"><?= htmlspecialchars($displayName) ?></span>
+                                    <span class="text-muted"><?= htmlspecialchars($email) ?></span>
+                                </div>
+                            </td>
 
-                        <td>
-                            <span class="text-muted"><?= htmlspecialchars($user['username'] ?? '-') ?></span>
-                        </td>
+                            <td>
+                                <span class="text-muted"><?= htmlspecialchars($user['username'] ?? '-') ?></span>
+                            </td>
 
-                        <td>
-                            <?php if (!empty($user['roles'])): ?>
-                                <span class="badge badge-light-primary"><?= htmlspecialchars($user['roles']) ?></span>
-                            <?php else: ?>
-                                <span class="badge badge-light fw-bold">No roles</span>
-                            <?php endif; ?>
-                        </td>
-
-                        <td>
-                            <span class="badge badge-light-<?= ($user['status'] === 'active') ? 'success' : 'danger' ?>">
-                                <?= htmlspecialchars(ucfirst($user['status'] ?? 'inactive')) ?>
-                            </span>
-                        </td>
-
-                        <!-- Last login (human readable + sortable) -->
-                        <td data-order="<?= (int) $lastLoginTs ?>">
-                            <span class="badge badge-light fw-bold"><?= htmlspecialchars($lastLoginText) ?></span>
-                        </td>
-
-                        <td class="text-end">
-                            <a
-                                href="#"
-                                class="btn btn-light btn-active-light-primary btn-flex btn-center btn-sm"
-                                data-kt-menu-trigger="click"
-                                data-kt-menu-placement="bottom-end"
-                            >
-                                Actions <i class="ki-outline ki-down fs-5 ms-1"></i>
-                            </a>
-
-                            <div
-                                class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px py-4"
-                                data-kt-menu="true"
-                            >
-                                <?php if (emr_can('admin.users.edit')): ?>
-                                    <div class="menu-item px-3">
-                                        <a
-                                            href="#"
-                                            class="menu-link px-3"
-                                            data-action="edit"
-                                            data-user-id="<?= (int) $user['id'] ?>"
-                                        >Edit</a>
-                                    </div>
+                            <td>
+                                <?php
+                                $rolesText = $user['roles'] ?? '';
+                                $roleNames = $rolesText ? array_filter(array_map('trim', explode('||', $rolesText))) : [];
+                                ?>
+                                <?php if (!empty($roleNames)): ?>
+                                    <?php foreach ($roleNames as $rn): ?>
+                                            <span class="badge badge-light-primary me-1 mb-1"><?= htmlspecialchars($rn) ?></span>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <span class="badge badge-light fw-bold">No roles</span>
                                 <?php endif; ?>
 
-                                <?php if (emr_can('admin.users.delete')): ?>
-                                    <div class="menu-item px-3">
-                                        <a
-                                            href="#"
-                                            class="menu-link px-3 text-danger"
-                                            data-action="delete"
-                                            data-user-id="<?= (int) $user['id'] ?>"
-                                        >Delete</a>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        </td>
-                    </tr>
+                            </td>
+
+                            <td>
+                                <span class="badge badge-light-<?= ($user['status'] === 'active') ? 'success' : 'danger' ?>">
+                                    <?= htmlspecialchars(ucfirst($user['status'] ?? 'inactive')) ?>
+                                </span>
+                            </td>
+
+                            <!-- Last login (human readable + sortable) -->
+                            <td data-order="<?= (int) $lastLoginTs ?>">
+                                <span class="badge badge-light fw-bold"><?= htmlspecialchars($lastLoginText) ?></span>
+                            </td>
+
+                            <td class="text-end">
+                                <a
+                                    href="#"
+                                    class="btn btn-light btn-active-light-primary btn-flex btn-center btn-sm"
+                                    data-kt-menu-trigger="click"
+                                    data-kt-menu-placement="bottom-end"
+                                >
+                                    Actions <i class="ki-outline ki-down fs-5 ms-1"></i>
+                                </a>
+
+                                <div
+                                    class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px py-4"
+                                    data-kt-menu="true"
+                                >
+                                    <?php if (emr_can('admin.users.edit')): ?>
+                                            <div class="menu-item px-3">
+                                                <a
+                                                    href="#"
+                                                    class="menu-link px-3"
+                                                    data-action="edit"
+                                                    data-user-id="<?= (int) $user['id'] ?>"
+                                                >Edit</a>
+                                            </div>
+                                    <?php endif; ?>
+
+                                    <?php if (emr_can('admin.users.delete')): ?>
+                                            <div class="menu-item px-3">
+                                                <a
+                                                    href="#"
+                                                    class="menu-link px-3 text-danger"
+                                                    data-action="delete"
+                                                    data-user-id="<?= (int) $user['id'] ?>"
+                                                >Delete</a>
+                                            </div>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
@@ -415,13 +422,21 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Role</label>
-                        <select name="role_id" class="form-select">
-                            <option value="">Select Role</option>
-                            <?php foreach ($roles as $role): ?>
-                                <option value="<?= (int) $role['id'] ?>"><?= htmlspecialchars($role['name']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                    <label class="form-label">Roles</label>
+                    <select
+                        id="add_roles"
+                        name="role_ids[]"
+                        class="form-select"
+                        data-control="select2"
+                        data-placeholder="Select Roles"
+                        data-allow-clear="true"
+                        multiple="multiple"
+                        data-dropdown-parent="#addUserModal"
+                    >
+                        <?php foreach ($roles as $role): ?>
+                            <option value="<?= (int) $role['id'] ?>"><?= htmlspecialchars($role['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
                     </div>
                 </div>
 
@@ -483,14 +498,23 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Role</label>
-                        <select name="role_id" class="form-select">
-                            <option value="">No Role</option>
-                            <?php foreach ($roles as $role): ?>
-                                <option value="<?= (int) $role['id'] ?>"><?= htmlspecialchars($role['name']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                    <label class="form-label">Roles</label>
+                    <select
+                        id="edit_roles"
+                        name="role_ids[]"
+                        class="form-select"
+                        data-control="select2"
+                        data-placeholder="Select Roles"
+                        data-allow-clear="true"
+                        multiple="multiple"
+                        data-dropdown-parent="#editUserModal"
+                    >
+                        <?php foreach ($roles as $role): ?>
+                            <option value="<?= (int) $role['id'] ?>"><?= htmlspecialchars($role['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
                     </div>
+
                 </div>
 
                 <div class="modal-footer">

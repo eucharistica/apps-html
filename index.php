@@ -3,6 +3,22 @@ require_once __DIR__ . '/apps/auth/guest.php';
 
 emr_redirect_if_logged_in();
 $csrf = emr_csrf_token();
+$ipDebug = [
+    'REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'] ?? null,
+    'HTTP_CF_CONNECTING_IP' => $_SERVER['HTTP_CF_CONNECTING_IP'] ?? null,
+    'HTTP_X_FORWARDED_FOR' => $_SERVER['HTTP_X_FORWARDED_FOR'] ?? null,
+    'HTTP_X_REAL_IP' => $_SERVER['HTTP_X_REAL_IP'] ?? null,
+    'HTTP_FORWARDED' => $_SERVER['HTTP_FORWARDED'] ?? null,
+];
+
+// tampilkan subset header biar tidak kepanjangan
+$headersAll = function_exists('getallheaders') ? getallheaders() : []; // fetch request headers [web:492]
+$interesting = ['CF-Connecting-IP','X-Forwarded-For','X-Real-Ip','Forwarded','True-Client-Ip'];
+$hdr = [];
+foreach ($interesting as $k) {
+    if (isset($headersAll[$k])) $hdr[$k] = $headersAll[$k];
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -45,6 +61,16 @@ $csrf = emr_csrf_token();
 										<h1 class="text-gray-900 mb-3 fs-3x">Sign In</h1>
 										<div class="text-gray-500 fw-semibold fs-6">Silakan masuk untuk melanjutkan</div>
 									</div>
+
+									<?php if (isset($_GET['debug_ip']) && $_GET['debug_ip'] === '1'): ?>
+									<div class="alert alert-warning mb-8">
+										<div class="fw-bold mb-2">IP Debug</div>
+										<pre class="mb-0" style="white-space: pre-wrap;"><?= htmlspecialchars(json_encode([
+										'server_vars' => $ipDebug,
+										'headers' => $hdr,
+										], JSON_PRETTY_PRINT)) ?></pre>
+									</div>
+									<?php endif; ?>
 
 									<div class="fv-row mb-8">
 										<input type="text" placeholder="Username" name="username" autocomplete="off" class="form-control form-control-solid" required />
@@ -91,6 +117,7 @@ $csrf = emr_csrf_token();
 				if (err === 'hubungi_it') text = 'Terlalu banyak percobaan. Hubungi Admin/IT.';
 				if (err === 'locked') text = 'Akun/percobaan login sedang dikunci sementara. Coba lagi nanti.';
 				if (err === 'server') text = 'Terjadi kesalahan server. Hubungi admin.';
+				if (err === 'ip_not_allowed') text = 'Login ditolak: Tidak diizinkan untuk login diluar jaringan RS.';
 
 				Swal.fire({ icon: 'error', title: title, text: text, confirmButtonText: 'OK' });
 			})();

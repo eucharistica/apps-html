@@ -1,7 +1,7 @@
 <?php
 // apps/simrs/tabs.php
 
-require_once __DIR__ . '/../auth/guard.php';
+require_once __DIR__ . '/../config/bootstrap.php';
 
 emr_require_login();
 

@@ -20,32 +20,35 @@ if (!$id) {
     exit;
 }
 
+// 1) ambil user
 $stmt = $pdo->prepare("
-    SELECT
-        u.id,
-        u.username,
-        u.name,
-        u.email,
-        u.status,
-        ur.role_id,
-        r.name AS role_name
-    FROM emr_users u
-    LEFT JOIN emr_user_has_roles ur ON ur.user_id = u.id
-    LEFT JOIN emr_roles r ON r.id = ur.role_id
-    WHERE u.id = ?
+    SELECT id, username, name, email, status
+    FROM emr_users
+    WHERE id = ?
     LIMIT 1
 ");
-
 $stmt->execute([$id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-error_log('DEBUG get-users: user=' . json_encode($user));
 
 if (!$user) {
     emr_json_error('User not found', 404);
 }
 
-// Default values (kalau memang mau dipaksa ada)
+// 2) ambil roles (multi)
+$stmt = $pdo->prepare("
+    SELECT ur.role_id, r.name
+    FROM emr_user_has_roles ur
+    INNER JOIN emr_roles r ON r.id = ur.role_id
+    WHERE ur.user_id = ?
+    ORDER BY r.name ASC
+");
+$stmt->execute([$id]);
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$user['role_ids'] = array_map(fn($x) => (string)$x['role_id'], $rows);
+$user['roles'] = array_map(fn($x) => $x['name'], $rows);
+
+// default display
 $user['name']  = $user['name'] ?? 'N/A';
 $user['email'] = $user['email'] ?? 'N/A';
 

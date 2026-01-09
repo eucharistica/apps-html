@@ -3,7 +3,7 @@
     <!--begin:Row-->
     <div class="row">
         <!--begin:Col-->
-        <div class="col-lg-8 mb-3 mb-lg-0  py-3 px-3 py-lg-6 px-lg-6">
+        <div class="col-lg-12 mb-3 mb-lg-0  py-3 px-3 py-lg-6 px-lg-6">
             <!--begin:Row-->
             <div class="row">
                 <!--begin:Col-->
@@ -152,130 +152,8 @@
                 <!--end:Col-->
             </div>
             <!--end:Row-->
-            <div class="separator separator-dashed mx-5 my-5"></div>
-            <!--begin:Landing-->
-            <div class="d-flex flex-stack flex-wrap flex-lg-nowrap gap-2 mx-5">
-                <div class="d-flex flex-column me-5">
-                    <div class="fs-6 fw-bold text-gray-800">
-                        Landing Page Template
-                    </div>
-                    <div class="fs-7 fw-semibold text-muted">
-                        Onpe page landing template with pricing & others
-                    </div>
-                </div>
-                <a href="?page=landing" class="btn btn-sm btn-primary fw-bold">
-                    Explore
-                </a>
-            </div>
-            <!--end:Landing-->
         </div>
-        <!--end:Col-->
-        <!--begin:Col-->
-        <div class="menu-more bg-light col-lg-4 py-3 px-3 py-lg-6 px-lg-6 rounded-end">
-            <!--begin:Heading-->
-            <h4 class="fs-6 fs-lg-4 text-gray-800 fw-bold mt-3 mb-3 ms-4">More Dashboards</h4>
-            <!--end:Heading-->
-
-            <!--begin:Menu item-->
-            <div class="menu-item p-0 m-0">
-                <!--begin:Menu link-->
-                <a href="?page=dashboards/logistics" class="menu-link py-2 ">
-                    <span class="menu-title">
-                        Logistics </span>
-                </a>
-                <!--end:Menu link-->
-            </div>
-            <!--end:Menu item-->
-
-            <!--begin:Menu item-->
-            <div class="menu-item p-0 m-0">
-                <!--begin:Menu link-->
-                <a href="?page=dashboards/website-analytics" class="menu-link py-2 ">
-                    <span class="menu-title">
-                        Website Analytics </span>
-                </a>
-                <!--end:Menu link-->
-            </div>
-            <!--end:Menu item-->
-
-            <!--begin:Menu item-->
-            <div class="menu-item p-0 m-0">
-                <!--begin:Menu link-->
-                <a href="?page=dashboards/finance-performance" class="menu-link py-2 ">
-                    <span class="menu-title">
-                        Finance Performance </span>
-                </a>
-                <!--end:Menu link-->
-            </div>
-            <!--end:Menu item-->
-
-            <!--begin:Menu item-->
-            <div class="menu-item p-0 m-0">
-                <!--begin:Menu link-->
-                <a href="?page=dashboards/store-analytics" class="menu-link py-2 ">
-                    <span class="menu-title">
-                        Store Analytics </span>
-                </a>
-                <!--end:Menu link-->
-            </div>
-            <!--end:Menu item-->
-
-            <!--begin:Menu item-->
-            <div class="menu-item p-0 m-0">
-                <!--begin:Menu link-->
-                <a href="?page=dashboards/social" class="menu-link py-2 ">
-                    <span class="menu-title">
-                        Social </span>
-                </a>
-                <!--end:Menu link-->
-            </div>
-            <!--end:Menu item-->
-
-            <!--begin:Menu item-->
-            <div class="menu-item p-0 m-0">
-                <!--begin:Menu link-->
-                <a href="?page=dashboards/delivery" class="menu-link py-2 ">
-                    <span class="menu-title">
-                        Delivery </span>
-                </a>
-                <!--end:Menu link-->
-            </div>
-            <!--end:Menu item-->
-
-            <!--begin:Menu item-->
-            <div class="menu-item p-0 m-0">
-                <!--begin:Menu link-->
-                <a href="?page=dashboards/crypto" class="menu-link py-2 ">
-                    <span class="menu-title">
-                        Crypto </span>
-                </a>
-                <!--end:Menu link-->
-            </div>
-            <!--end:Menu item-->
-
-            <!--begin:Menu item-->
-            <div class="menu-item p-0 m-0">
-                <!--begin:Menu link-->
-                <a href="?page=dashboards/school" class="menu-link py-2 ">
-                    <span class="menu-title">
-                        School </span>
-                </a>
-                <!--end:Menu link-->
-            </div>
-            <!--end:Menu item-->
-
-            <!--begin:Menu item-->
-            <div class="menu-item p-0 m-0">
-                <!--begin:Menu link-->
-                <a href="?page=dashboards/podcast" class="menu-link py-2 ">
-                    <span class="menu-title">
-                        Podcast </span>
-                </a>
-                <!--end:Menu link-->
-            </div>
-            <!--end:Menu item-->
-        </div>
-        <!--end:Col-->
+        <!--end:Col-->        
     </div>
     <!--end:Row-->
 </div>

@@ -1,7 +1,7 @@
 <?php
 // apps/auth/sign-in.php
-
 require_once __DIR__ . '/../config/bootstrap.php';
+require_once __DIR__ . '/ip_whitelist.php';
 
 $pdo = emr_pdo();
 
@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $username = trim((string)($_POST['username'] ?? ''));
 $password = (string)($_POST['password'] ?? '');
-$ip = $_SERVER['REMOTE_ADDR'] ?? null;
+$ip = emr_client_ip_public();
 
 if ($username === '' || $password === '') {
     emr_audit('login_failed', 'Missing credentials');
@@ -34,10 +34,10 @@ if (($unknown['lock_until'] ?? 0) > time()) {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT id, username, name, email, profile_photo_path, password, status
-                           FROM emr_users
-                           WHERE username = ?
-                           LIMIT 1");
+    $stmt = $pdo->prepare("SELECT id, username, name, email, profile_photo_path, password, status, allow_external_login
+                       FROM emr_users
+                       WHERE username = ?
+                       LIMIT 1");
     $stmt->execute([$username]);
     $user = $stmt->fetch();
 
@@ -87,6 +87,20 @@ try {
 
     // Success: reset throttles
     unset($_SESSION[$keyUnknown], $_SESSION[$keyKnown]);
+
+    if (!emr_can_login_by_access_mode($user)) {
+        $ipPub = emr_client_ip_public();
+        // Catat audit biar kebaca alasan ditolak
+        emr_audit('login_denied', 'External login not allowed', [
+            'ip_public' => $ipPub,
+            'host' => $_SERVER['HTTP_HOST'] ?? null,
+            'remote_addr' => $_SERVER['REMOTE_ADDR'] ?? null,
+        ]);
+        header('Location: /?error=ip_not_allowed');
+        exit;
+    }
+
+
 
     // Prevent session fixation (regen after auth)
     session_regenerate_id(true); // recommended practice [web:329]
