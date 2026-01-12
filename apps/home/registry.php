@@ -16,7 +16,7 @@ return [
         'subtitle' => 'Pelayanan klinis',
         'icon' => 'ki-outline ki-key-square',
         'url' => 'apps/simrs/index.php',
-        'permission' => 'simrs.dashboard.view',
+        'permission' => 'simrs.access',
         'order' => 10,
     ],
 

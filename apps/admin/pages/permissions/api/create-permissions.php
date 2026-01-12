@@ -4,22 +4,13 @@ require_once __DIR__ . '/../../../../auth/rbac.php';
 
 header('Content-Type: application/json');
 
-if (!emr_can('admin.permissions.create') && !emr_can('admin.access')) {
-  http_response_code(403);
-  echo json_encode(['success' => false, 'message' => 'Forbidden']);
-  exit;
-}
+emr_require_permission_api('admin.permissions.create');
 
 $pdo = emr_pdo();
 
 $name = trim($_POST['permission_name'] ?? '');
-$csrf = $_POST['_csrf'] ?? '';
+$csrf = $_POST['_token'] ?? '';
 
-/**
- * Kalau project kamu punya helper validasi CSRF, panggil di sini.
- * Contoh (sesuaikan nama function di project kamu):
- *   if (!emr_csrf_verify($csrf)) emr_json_error('Invalid CSRF token', 419);
- */
 if ($name === '') {
   emr_json_error('Permission name is required', 422);
   exit;
@@ -44,10 +35,16 @@ try {
   $stmt = $pdo->prepare("INSERT INTO emr_permissions (name, created_at, updated_at) VALUES (?, ?, ?)");
   $stmt->execute([$name, $now, $now]);
 
-  emr_json_success([
-    'id' => (int)$pdo->lastInsertId(),
-    'name' => $name,
+  echo json_encode([
+    'success' => true,
+    'message' => 'Permission berhasil dibuat',
+    'data' => [
+      'id' => (int)$pdo->lastInsertId(),
+      'name' => $name,
+    ],
   ]);
+  exit;
+
 } catch (Throwable $e) {
   error_log('create-permission error: ' . $e->getMessage());
   emr_json_error('Server error', 500);

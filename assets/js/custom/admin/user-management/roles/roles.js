@@ -123,7 +123,7 @@
             const body =
                 `role_name=${encodeURIComponent(name)}` +
                 `&permission_ids=${encodeURIComponent(JSON.stringify(permissionIds))}` +
-                `&_csrf=${encodeURIComponent(csrf())}`;
+                `&_token=${encodeURIComponent(csrf())}`;
 
             const json = await apiJson(API.createRole, {
                 method: "POST",
@@ -340,7 +340,7 @@
             const bodyName =
                 `role_id=${encodeURIComponent(roleId)}` +
                 `&role_name=${encodeURIComponent(roleName)}` +
-                `&_csrf=${encodeURIComponent(csrf())}`;
+                `&_token=${encodeURIComponent(csrf())}`;
 
             const jsonName = await apiJson(API.updateRole, {
                 method: "POST",
@@ -354,7 +354,7 @@
             const bodyPerms =
                 `role_id=${encodeURIComponent(roleId)}` +
                 `&permission_ids=${encodeURIComponent(JSON.stringify(permissionIds))}` +
-                `&_csrf=${encodeURIComponent(csrf())}`;
+                `&_token=${encodeURIComponent(csrf())}`;
 
             const jsonPerms = await apiJson(API.updateRolePerms, {
                 method: "POST",

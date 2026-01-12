@@ -4,19 +4,20 @@ require_once __DIR__ . '/apps/auth/guest.php';
 emr_redirect_if_logged_in();
 $csrf = emr_csrf_token();
 $ipDebug = [
-    'REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'] ?? null,
-    'HTTP_CF_CONNECTING_IP' => $_SERVER['HTTP_CF_CONNECTING_IP'] ?? null,
-    'HTTP_X_FORWARDED_FOR' => $_SERVER['HTTP_X_FORWARDED_FOR'] ?? null,
-    'HTTP_X_REAL_IP' => $_SERVER['HTTP_X_REAL_IP'] ?? null,
-    'HTTP_FORWARDED' => $_SERVER['HTTP_FORWARDED'] ?? null,
+	'REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'] ?? null,
+	'HTTP_CF_CONNECTING_IP' => $_SERVER['HTTP_CF_CONNECTING_IP'] ?? null,
+	'HTTP_X_FORWARDED_FOR' => $_SERVER['HTTP_X_FORWARDED_FOR'] ?? null,
+	'HTTP_X_REAL_IP' => $_SERVER['HTTP_X_REAL_IP'] ?? null,
+	'HTTP_FORWARDED' => $_SERVER['HTTP_FORWARDED'] ?? null,
 ];
 
 // tampilkan subset header biar tidak kepanjangan
 $headersAll = function_exists('getallheaders') ? getallheaders() : []; // fetch request headers [web:492]
-$interesting = ['CF-Connecting-IP','X-Forwarded-For','X-Real-Ip','Forwarded','True-Client-Ip'];
+$interesting = ['CF-Connecting-IP', 'X-Forwarded-For', 'X-Real-Ip', 'Forwarded', 'True-Client-Ip'];
 $hdr = [];
 foreach ($interesting as $k) {
-    if (isset($headersAll[$k])) $hdr[$k] = $headersAll[$k];
+	if (isset($headersAll[$k]))
+		$hdr[$k] = $headersAll[$k];
 }
 
 ?>
@@ -54,7 +55,7 @@ foreach ($interesting as $k) {
 						</div>
 
 						<div class="py-20">
-							<form class="form w-100" method="post" action="apps/auth/sign-in.php">
+							<form class="form w-100" id="emr_login_form" method="post" action="apps/auth/sign-in-api.php">
 								<input type="hidden" name="_token" value="<?= htmlspecialchars($csrf) ?>" />
 								<div class="card-body">
 									<div class="text-start mb-10">
@@ -63,13 +64,13 @@ foreach ($interesting as $k) {
 									</div>
 
 									<?php if (isset($_GET['debug_ip']) && $_GET['debug_ip'] === '1'): ?>
-									<div class="alert alert-warning mb-8">
-										<div class="fw-bold mb-2">IP Debug</div>
-										<pre class="mb-0" style="white-space: pre-wrap;"><?= htmlspecialchars(json_encode([
-										'server_vars' => $ipDebug,
-										'headers' => $hdr,
-										], JSON_PRETTY_PRINT)) ?></pre>
-									</div>
+										<div class="alert alert-warning mb-8">
+											<div class="fw-bold mb-2">IP Debug</div>
+											<pre class="mb-0" style="white-space: pre-wrap;"><?= htmlspecialchars(json_encode([
+												'server_vars' => $ipDebug,
+												'headers' => $hdr,
+											], JSON_PRETTY_PRINT)) ?></pre>
+										</div>
 									<?php endif; ?>
 
 									<div class="fv-row mb-8">
@@ -102,25 +103,7 @@ foreach ($interesting as $k) {
 		<script>var hostUrl = "assets/";</script>
 		<script src="assets/plugins/global/plugins.bundle.js"></script>
 		<script src="assets/js/scripts.bundle.js"></script>
-		<script>
-			(function () {
-				var params = new URLSearchParams(window.location.search);
-				var err = params.get('error');
-				if (!err || typeof Swal === 'undefined') return;
+		<script src="assets/js/custom/authentication/sign-in/login.js"></script>
 
-				var title = 'Login gagal';
-				var text = 'Silakan coba lagi.';
-				if (err === 'empty') text = 'Username dan password wajib diisi.';
-				if (err === 'invalid') text = 'Username atau password salah.';
-				if (err === 'inactive') text = 'Akun tidak aktif.';
-				if (err === 'csrf') text = 'Sesi tidak valid. Silakan refresh halaman dan coba lagi.';
-				if (err === 'hubungi_it') text = 'Terlalu banyak percobaan. Hubungi Admin/IT.';
-				if (err === 'locked') text = 'Akun/percobaan login sedang dikunci sementara. Coba lagi nanti.';
-				if (err === 'server') text = 'Terjadi kesalahan server. Hubungi admin.';
-				if (err === 'ip_not_allowed') text = 'Login ditolak: Tidak diizinkan untuk login diluar jaringan RS.';
-
-				Swal.fire({ icon: 'error', title: title, text: text, confirmButtonText: 'OK' });
-			})();
-		</script>
 	</body>
 </html>

@@ -278,7 +278,7 @@
         const r = await fetch(`${baseUrl()}apps/admin/pages/users/api/delete-user.php`, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: `user_id=${encodeURIComponent(userId)}&_csrf=${encodeURIComponent(csrf)}`,
+          body: `user_id=${encodeURIComponent(userId)}&_token=${encodeURIComponent(csrf)}`,
         });
 
         const data = await r.json();
@@ -322,7 +322,7 @@
         try {
           const fd = new FormData(addForm);
           const csrf = csrfToken();
-          if (csrf) fd.append("_csrf", csrf);
+          if (csrf) fd.append("_token", csrf);
 
           const r = await fetch(`${baseUrl()}apps/admin/pages/users/api/create-user.php`, {
             method: "POST",
@@ -353,7 +353,7 @@
         try {
           const fd = new FormData(editForm);
           const csrf = csrfToken();
-          if (csrf) fd.append("_csrf", csrf);
+          if (csrf) fd.append("_token", csrf);
 
           const r = await fetch(`${baseUrl()}apps/admin/pages/users/api/update-user.php`, {
             method: "POST",

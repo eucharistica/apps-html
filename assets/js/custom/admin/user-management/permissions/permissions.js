@@ -3,8 +3,8 @@
 (function () {
   const qs = (sel, root = document) => root.querySelector(sel);
 
-  const BASE = window.EMR?.baseUrl || "/";
-  const csrf = () => qs("#csrf_token")?.value || "";
+  const BASE = (window.EMR?.baseUrl || "/").replace(/\/?$/, "/");
+  const csrf = () => qs('input[name="_token"]')?.value || "";
 
   const SEL = {
     table: "#kt_permissions_table",
@@ -22,7 +22,7 @@
 
   const API = {
     list: `${BASE}apps/admin/pages/permissions/api/list-permissions.php`,
-    create: `${BASE}apps/admin/pages/permissions/api/create-permission.php`,
+    create: `${BASE}apps/admin/pages/permissions/api/create-permissions.php`,
     sync: `${BASE}apps/admin/pages/permissions/api/sync-registry.php`,
   };
 
@@ -262,7 +262,7 @@
           try {
             const body =
               `permission_name=${encodeURIComponent(name)}` +
-              `&_csrf=${encodeURIComponent(csrf())}`;
+              `&_token=${encodeURIComponent(csrf())}`;
 
             const json = await apiJson(API.create, {
               method: "POST",
@@ -275,7 +275,10 @@
               return;
             }
 
-            await swalOk("Berhasil", json.message || "Permission berhasil dibuat");
+            const msg = (json && typeof json.message === "string" && json.message.trim())
+              ? json.message
+              : `Permission berhasil dibuat: ${name}`;
+            await swalOk("Berhasil", msg);
             form.reset();
             modal.hide();
             await Permissions.reload();
@@ -313,7 +316,7 @@
         btn.disabled = true;
 
         try {
-          const body = `_csrf=${encodeURIComponent(csrf())}`;
+          const body = `_token=${encodeURIComponent(csrf())}`;
           const json = await apiJson(API.sync, {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },

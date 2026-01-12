@@ -145,7 +145,7 @@ $GLOBALS['EMR_ADMIN_MENU'] = $__admin_menu;
 <script>var hostUrl = "<?= $asset ?>";</script>
 <script>
     window.EMR = {
-        baseUrl: "<?= EMR_BASE_URL ?>"
+        baseUrl: "<?= rtrim(EMR_BASE_URL, '/') ?>/"
     };
 </script>
 <script src="<?= $asset ?>plugins/global/plugins.bundle.js"></script>

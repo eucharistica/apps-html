@@ -7,9 +7,10 @@ require_once __DIR__ . '/../../../../auth/rbac.php';
 header('Content-Type: application/json');
 
 // ================= CSRF =================
-$token = $_POST['_csrf'] ?? null;
+$token = $_POST['_token'] ?? null;
 if (!emr_csrf_validate($token)) {
     emr_json_error('Invalid CSRF token', 403);
+    exit;
 }
 
 // ================= Permission =================

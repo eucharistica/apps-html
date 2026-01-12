@@ -69,7 +69,7 @@ $signOutUrl = EMR_BASE_URL . 'apps/auth/sign-out.php';
 
     <!--begin::Menu item-->
     <div class="menu-item px-5">
-        <a href="<?= htmlspecialchars($signOutUrl) ?>" class="menu-link px-5">
+        <a href="#" data-signout-url="<?= htmlspecialchars($signOutUrl) ?>" id="emr_logout_btn" class="menu-link px-5">
             Sign Out
         </a>
     </div>

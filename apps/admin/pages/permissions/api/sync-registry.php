@@ -4,11 +4,7 @@ require_once __DIR__ . '/../../../../auth/rbac.php';
 
 header('Content-Type: application/json');
 
-if (!emr_can('admin.access')) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Forbidden']);
-    exit;
-}
+emr_require_permission_api('admin.access');
 
 $pdo = emr_pdo();
 

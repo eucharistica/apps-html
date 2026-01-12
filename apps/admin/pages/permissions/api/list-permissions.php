@@ -4,11 +4,7 @@ require_once __DIR__ . '/../../../../auth/rbac.php';
 
 header('Content-Type: application/json');
 
-if (!emr_can('admin.permissions.view')) {
-  http_response_code(403);
-  echo json_encode(['success' => false, 'message' => 'Forbidden']);
-  exit;
-}
+emr_require_permission_api('admin.permissions.view');
 
 $pdo = emr_pdo();
 
@@ -22,7 +18,14 @@ $sql = "
   FROM emr_permissions p
   LEFT JOIN emr_role_has_permissions rp ON rp.permission_id = p.id
   LEFT JOIN emr_roles r ON r.id = rp.role_id
-  ORDER BY p.id DESC
+  ORDER BY
+  CASE
+    WHEN p.name LIKE 'admin.%' THEN 1
+    WHEN p.name LIKE 'simrs.%' THEN 2
+    ELSE 99
+  END,
+  p.name ASC,
+  r.name ASC
 ";
 
 $stmt = $pdo->query($sql);

@@ -2,6 +2,7 @@
 // apps/auth/sign-in.php
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once __DIR__ . '/ip_whitelist.php';
+require_once __DIR__ . '/app_context.php';
 
 $pdo = emr_pdo();
 
@@ -34,10 +35,10 @@ if (($unknown['lock_until'] ?? 0) > time()) {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT id, username, name, email, profile_photo_path, password, status, allow_external_login
-                       FROM emr_users
-                       WHERE username = ?
-                       LIMIT 1");
+    $stmt = $pdo->prepare("SELECT id, username, name, email, profile_photo_path, password, status, allow_external_login, auth_version
+                            FROM emr_users
+                            WHERE username = ?
+                            LIMIT 1");
     $stmt->execute([$username]);
     $user = $stmt->fetch();
 
@@ -119,12 +120,32 @@ try {
 
     // Load permissions (via roles)
     $stmt = $pdo->prepare("SELECT DISTINCT p.name
-                           FROM emr_permissions p
-                           INNER JOIN emr_role_has_permissions rp ON rp.permission_id = p.id
-                           INNER JOIN emr_user_has_roles ur ON ur.role_id = rp.role_id
-                           WHERE ur.user_id = ?");
+                       FROM emr_permissions p
+                       INNER JOIN emr_role_has_permissions rp ON rp.permission_id = p.id
+                       INNER JOIN emr_user_has_roles ur ON ur.role_id = rp.role_id
+                       WHERE ur.user_id = ?");
     $stmt->execute([$user['id']]);
     $permissions = array_map(fn($row) => $row['name'], $stmt->fetchAll());
+
+    $stmt = $pdo->prepare("SELECT r.type, p.name
+                       FROM emr_roles r
+                       INNER JOIN emr_user_has_roles ur ON ur.role_id = r.id
+                       INNER JOIN emr_role_has_permissions rp ON rp.role_id = r.id
+                       INNER JOIN emr_permissions p ON p.id = rp.permission_id
+                       WHERE ur.user_id = ?");
+    $stmt->execute([$user['id']]);
+
+    $permissionsByType = [];
+    foreach ($stmt->fetchAll() as $row) {
+        $t = (string)$row['type'];
+        $n = (string)$row['name'];
+        $permissionsByType[$t][$n] = true;
+    }
+
+    // normalize jadi array of names
+    foreach ($permissionsByType as $t => $set) {
+        $permissionsByType[$t] = array_keys($set);
+    }
 
     $_SESSION['emr_user'] = [
         'id' => (int)$user['id'],
@@ -134,11 +155,13 @@ try {
         'profile_photo_path' => $user['profile_photo_path'],
         'roles' => $roles,
         'permissions' => $permissions,
+        'permissions_by_type' => $permissionsByType,
+        'auth_version' => (int)($user['auth_version'] ?? 1),
     ];
 
     emr_audit('login_success', 'User logged in');
 
-    header('Location: ' . EMR_HOME_URL);
+    header('Location: ' . EMR_HOME_URL . '?login=success');
     exit;
 
 } catch (Throwable $e) {

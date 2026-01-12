@@ -43,6 +43,20 @@ try {
 
     $pdo->commit();
 
+    // Bump auth_version untuk semua user yang punya role ini
+    $stmt = $pdo->prepare("
+        UPDATE emr_users u
+        INNER JOIN emr_user_has_roles ur ON ur.user_id = u.id
+        SET u.auth_version = u.auth_version + 1
+        WHERE ur.role_id = ?
+    ");
+    $stmt->execute([$roleId]);
+
+    emr_audit('admin.role_permissions_updated', 'Role permissions updated', [
+        'role_id' => $roleId,
+    ]);
+
+
     // emr_json_success() di project kamu tidak boleh null
     emr_json_success(['role_id' => $roleId], 'Role permissions updated');
 } catch (Throwable $e) {

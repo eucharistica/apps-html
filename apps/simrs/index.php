@@ -1,11 +1,12 @@
 <?php
 // apps/simrs/index.php
 
-require_once __DIR__ . '/../auth/rbac.php';
 require_once __DIR__ . '/../config/bootstrap.php';
+require_once __DIR__ . '/../auth/rbac.php';
 
 emr_require_login();
 
+emr_require_permission('simrs.access');
 $pdo = emr_pdo();
 $userId = (int)($_SESSION['emr_user']['id'] ?? 0);
 
@@ -60,8 +61,8 @@ if ($pageParam === null || $pageParam === '') {
         // ignore
     }
 
-    // fallback
-    header('Location: ' . EMR_BASE_URL . 'apps/simrs/index.php');
+    // fallback terakhir: arahkan ke dashboard
+    header('Location: ' . EMR_BASE_URL . 'apps/simrs/index.php?page=dashboard');
     exit;
 }
 

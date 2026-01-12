@@ -58,6 +58,7 @@
 
       <div class="modal-body scroll-y mx-5 mx-xl-15 my-7">
         <form id="kt_modal_add_permission_form" class="form" action="#">
+        <input type="hidden" id="csrf_token" name="_token" value="<?= htmlspecialchars(emr_csrf_token()) ?>">
           <div class="fv-row mb-7">
             <label class="fs-6 fw-semibold form-label mb-2">
               <span class="required">Permission Name</span>

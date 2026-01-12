@@ -1,5 +1,4 @@
 <?php
-// apps/simrs/errors/500.php
 require_once __DIR__ . '../../apps/config/bootstrap.php';
 
 http_response_code(500);

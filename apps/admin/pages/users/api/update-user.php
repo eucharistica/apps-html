@@ -7,9 +7,10 @@ require_once __DIR__ . '/../../../../auth/rbac.php';
 header('Content-Type: application/json');
 
 // CSRF
-$token = $_POST['_csrf'] ?? null;
+$token = $_POST['_token'] ?? null;
 if (!emr_csrf_validate($token)) {
-    return_json_error('Invalid CSRF token', 403);
+    emr_json_error('Invalid CSRF token', 403);
+    exit;
 }
 
 if (!emr_can('admin.users.edit')) {
@@ -64,8 +65,12 @@ try {
     }
 
     $pdo->commit();
+    $stmt = $pdo->prepare("UPDATE emr_users SET auth_version = auth_version + 1 WHERE id = ?");
+    $stmt->execute([$user_id]);
 
-    emr_audit('admin.user_updated', 'Updated user ID: ' . $user_id);
+    emr_audit('admin.user_updated', 'Updated user', [
+    'user_id' => (int)$user_id,
+    ]);
     emr_json_success([], 'User updated');
 
 } catch (Exception $e) {
