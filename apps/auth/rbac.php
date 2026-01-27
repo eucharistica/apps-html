@@ -69,6 +69,12 @@ function emr_permissions(): array
 
 function emr_can(string $permissionName): bool
 {
+    $u = $_SESSION['emr_user'] ?? null;
+    if (!$u) return false;
+
+    $all = $u['permissions'] ?? [];
+    if (in_array('system.superuser', $all, true)) return true;
+
     return in_array($permissionName, emr_permissions(), true);
 }
 
